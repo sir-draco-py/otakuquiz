@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OtakuQuiz — Uji Pengetahuan Anime & Manga Kamu!</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF3D8B;
+    --yellow: #FFD726;
+    --cyan: #00E5FF;
+    --purple: #9B5DE5;
+    --orange: #FF6B35;
+    --bg: #0D0D1A;
+    --card: #16162A;
+    --card2: #1E1E38;
+    --text: #F0F0FF;
+    --muted: #8888AA;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(255,61,139,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(155,93,229,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 30%, rgba(0,229,255,0.08) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: block; }
+
+  /* ===== FLOATING PARTICLES ===== */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    font-size: 1.5rem;
+    opacity: 0.15;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== LANDING SCREEN ===== */
+  #screen-landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  #screen-landing.active { display: flex; }
+
+  .logo-badge {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+    font-family: 'Bangers', cursive;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    padding: 6px 18px;
+    border-radius: 50px;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .hero-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(4rem, 12vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--yellow) 40%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: titlePop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes titlePop {
+    0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+    font-weight: 600;
+    animation: fadeInUp 0.8s 0.3s ease both;
+  }
+  @keyframes fadeInUp {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+    animation: fadeInUp 0.8s 0.5s ease both;
+  }
+  .stat-item {
+    text-align: center;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+  }
+  .stat-num {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    color: var(--yellow);
+    letter-spacing: 1px;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), var(--orange));
+    color: white;
+    border: none;
+    font-family: 'Bangers', cursive;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    padding: 1rem 3rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 30px rgba(255,61,139,0.4);
+    animation: fadeInUp 0.8s 0.7s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 40px rgba(255,61,139,0.6); }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:active { transform: translateY(0) scale(0.98); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--cyan);
+    border: 2px solid var(--cyan);
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 1rem;
+  }
+  .btn-secondary:hover { background: rgba(0,229,255,0.1); transform: translateY(-2px); }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+    max-width: 500px;
+    animation: fadeInUp 0.8s 0.9s ease both;
+  }
+  .cat-chip {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cat-chip:hover { border-color: var(--pink); color: var(--pink); transform: scale(1.05); }
+  .cat-chip .emoji { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+
+  /* ===== AUTH SCREEN ===== */
+  #screen-auth {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  #screen-auth.active { display: flex; }
+
+  .auth-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pink), var(--purple), var(--cyan));
+  }
+
+  .auth-title {
+    font-family: 'Bangers', cursive;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .auth-subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; font-weight: 600; }
+
+  .tab-row {
+    display: flex;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 2rem;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+  .form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--pink); }
+  .form-input::placeholder { color: var(--muted); }
+
+  .avatar-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .avatar-opt {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    transition: all 0.2s;
+  }
+  .avatar-opt:hover, .avatar-opt.selected { border-color: var(--pink); transform: scale(1.1); }
+
+  /* ===== QUIZ SCREEN ===== */
+  #screen-quiz {
+    min-height: 100vh;
+    padding: 1.5rem;
+  }
+  #screen-quiz.active { display: block; }
+
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .quiz-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--card2);
+    border-radius: 4px;
+    margin: 0 1rem;
+    overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--yellow));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .score-badge {
+    background: var(--card);
+    border: 1px solid rgba(255,215,38,0.3);
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    color: var(--yellow);
+    letter-spacing: 1px;
+  }
+
+  .timer-circle {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(var(--cyan) 0%, var(--card2) 0%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .timer-inner {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    color: var(--cyan);
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 2rem;
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    overflow: hidden;
+    animation: cardSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes cardSlideIn {
+    0% { transform: translateX(60px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--pink), var(--cyan));
+  }
+
+  .question-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .q-tag {
+    background: rgba(155,93,229,0.2);
+    color: var(--purple);
+    border: 1px solid rgba(155,93,229,0.3);
+    border-radius: 50px;
+    padding: 3px 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .question-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .answer-btn {
+    background: var(--card);
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    animation: fadeInUp 0.4s ease both;
+  }
+  .answer-btn:nth-child(1) { animation-delay: 0.05s; }
+  .answer-btn:nth-child(2) { animation-delay: 0.1s; }
+  .answer-btn:nth-child(3) { animation-delay: 0.15s; }
+  .answer-btn:nth-child(4) { animation-delay: 0.2s; }
+  .answer-btn:hover:not(:disabled) { border-color: var(--pink); background: rgba(255,61,139,0.1); transform: translateY(-2px); }
+  .answer-btn:disabled { cursor: not-allowed; }
+  .answer-btn.correct { border-color: #00FF88; background: rgba(0,255,136,0.15); color: #00FF88; }
+  .answer-btn.wrong { border-color: #FF4444; background: rgba(255,68,68,0.15); color: #FF4444; }
+
+  .answer-letter {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bangers', cursive;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+  .answer-btn.correct .answer-letter { background: rgba(0,255,136,0.2); color: #00FF88; }
+  .answer-btn.wrong .answer-letter { background: rgba(255,68,68,0.2); color: #FF4444; }
+
+  /* ===== RESULT SCREEN ===== */
+  #screen-result {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  #screen-result.active { display: flex; }
+
+  .result-emoji {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes bounceIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .result-title {
+    font-family: 'Bangers', cursive;
+    font-size: 3.5rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--yellow), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+  .result-score-big {
+    font-family: 'Bangers', cursive;
+    font-size: 6rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    animation: scoreCount 1s ease both 0.3s;
+  }
+  @keyframes scoreCount {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .result-label { color: var(--muted); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem; }
+
+  .result-stats {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .result-stat {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    min-width: 100px;
+  }
+  .result-stat-num { font-family: 'Bangers', cursive; font-size: 2rem; letter-spacing: 1px; }
+  .result-stat-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .correct-stat .result-stat-num { color: #00FF88; }
+  .wrong-stat .result-stat-num { color: #FF4444; }
+  .time-stat .result-stat-num { color: var(--cyan); }
+
+  .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.2);
+    color: var(--text);
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+  /* ===== LEADERBOARD SCREEN ===== */
+  #screen-leaderboard {
+    min-height: 100vh;
+    padding: 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  #screen-leaderboard.active { display: block; }
+
+  .lb-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .lb-title {
+    font-family: 'Bangers', cursive;
+    font-size: 3rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--yellow), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .lb-subtitle { color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+
+  .lb-podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    height: 160px;
+  }
+  .podium-place {
+    flex: 1;
+    max-width: 140px;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0.8rem;
+    position: relative;
+  }
+  .podium-place.p1 { height: 100%; background: linear-gradient(180deg, rgba(255,215,38,0.3), rgba(255,215,38,0.1)); border: 1px solid rgba(255,215,38,0.4); }
+  .podium-place.p2 { height: 75%; background: linear-gradient(180deg, rgba(192,192,192,0.2), rgba(192,192,192,0.05)); border: 1px solid rgba(192,192,192,0.3); }
+  .podium-place.p3 { height: 60%; background: linear-gradient(180deg, rgba(205,127,50,0.2), rgba(205,127,50,0.05)); border: 1px solid rgba(205,127,50,0.3); }
+  .podium-avatar { font-size: 2rem; margin-bottom: 0.3rem; }
+  .podium-name { font-size: 0.75rem; font-weight: 800; color: var(--text); text-align: center; }
+  .podium-score { font-family: 'Bangers', cursive; font-size: 1.1rem; letter-spacing: 1px; }
+  .podium-place.p1 .podium-score { color: var(--yellow); }
+  .podium-place.p2 .podium-score { color: #C0C0C0; }
+  .podium-place.p3 .podium-score { color: #CD7F32; }
+  .crown { font-size: 1.2rem; }
+
+  .lb-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .lb-item {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+    animation: fadeInUp 0.4s ease both;
+  }
+  .lb-item:hover { border-color: rgba(255,255,255,0.15); transform: translateX(4px); }
+  .lb-rank { font-family: 'Bangers', cursive; font-size: 1.3rem; color: var(--muted); width: 28px; text-align: center; letter-spacing: 1px; }
+  .lb-avatar { font-size: 1.8rem; }
+  .lb-info { flex: 1; }
+  .lb-name { font-weight: 800; font-size: 0.95rem; }
+  .lb-meta { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+  .lb-score-val { font-family: 'Bangers', cursive; font-size: 1.5rem; color: var(--yellow); letter-spacing: 1px; }
+
+  .lb-item.is-me { border-color: rgba(255,61,139,0.4); background: rgba(255,61,139,0.08); }
+  .lb-item.is-me .lb-name::after { content: ' (Kamu)'; color: var(--pink); font-size: 0.8rem; }
+
+  /* ===== NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(22,22,42,0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    gap: 0.3rem;
+    z-index: 100;
+  }
+  .nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .nav-btn span:first-child { font-size: 1.1rem; }
+  .nav-btn.active, .nav-btn:hover { background: rgba(255,61,139,0.2); color: var(--pink); }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    top: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 0.8rem 1.5rem;
+    font-weight: 800;
+    font-size: 0.9rem;
+    z-index: 200;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(0,255,136,0.4); color: #00FF88; }
+  .toast.error { border-color: rgba(255,68,68,0.4); color: #FF4444; }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 300;
+    animation: confettiFall 3s ease forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .stats-row { gap: 1rem; }
+    .category-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav" id="bottomNav" style="display:none;">
+  <button class="nav-btn" onclick="showScreen('screen-landing')">
+    <span>🏠</span><span>Home</span>
+  </button>
+  <button class="nav-btn" onclick="startQuiz()">
+    <span>🎮</span><span>Main</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('screen-leaderboard')">
+    <span>🏆</span><span>Ranking</span>
+  </button>
+</nav>
+
+<!-- ===== LANDING ===== -->
+<div class="screen active" id="screen-landing">
+  <div class="logo-badge">🎌 OTAKU QUIZ</div>
+  <h1 class="hero-title">OtakuQuiz</h1>
+  <p class="hero-sub">Uji pengetahuan Anime & Manga kamu! Can you reach the top? 🏆</p>
+  
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-num">50+</div>
+      <div class="stat-label">Soal</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Kategori</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Fun!</div>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn-primary" onclick="showScreen('screen-auth')">MULAI MAIN! 🚀</button>
+    <button class="btn-secondary" onclick="showScreen('screen-leaderboard')">Leaderboard</button>
+  </div>
+
+  <div class="category-grid">
+    <div class="cat-chip"><span class="emoji">⚔️</span>Action</div>
+    <div class="cat-chip"><span class="emoji">🔮</span>Fantasy</div>
+    <div class="cat-chip"><span class="emoji">😂</span>Comedy</div>
+    <div class="cat-chip"><span class="emoji">📚</span>Manga</div>
+    <div class="cat-chip"><span class="emoji">🎵</span>Opening</div>
+    <div class="cat-chip"><span class="emoji">👾</span>Karakter</div>
+  </div>
+</div>
+
+<!-- ===== AUTH ===== -->
+<div class="screen" id="screen-auth">
+  <div class="auth-card">
+    <div class="auth-title">Welcome!</div>
+    <p class="auth-subtitle">Login atau daftar untuk simpan skor kamu</p>
+    
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Daftar</button>
+    </div>
+
+    <!-- Login -->
+    <div id="form-login">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="login-username" type="text" placeholder="Masukkan username...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="login-password" type="password" placeholder="Masukkan password...">
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="handleLogin()">LOGIN →</button>
+      <div style="text-align:center;margin-top:1rem;">
+        <button onclick="guestPlay()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;text-decoration:underline;">
+          Main sebagai tamu dulu
+        </button>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div id="form-register" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="reg-username" type="text" placeholder="Pilih username kamu...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="reg-password" type="password" placeholder="Buat password...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pilih Avatar</label>
+        <div class="avatar-row">
+          <div class="avatar-opt selected" data-avatar="🦊" onclick="selectAvatar(this)">🦊</div>
+          <div class="avatar-opt" data-avatar="🐉" onclick="selectAvatar(this)">🐉</div>
+          <div class="avatar-opt" data-avatar="⚡" onclick="selectAvatar(this)">⚡</div>
+          <div class="avatar-opt" data-avatar="🌸" onclick="selectAvatar(this)">🌸</div>
+          <div class="avatar-opt" data-avatar="🔥" onclick="selectAvatar(this)">🔥</div>
+          <div class="avatar-opt" data-avatar="🌙" onclick="selectAvatar(this)">🌙</div>
+          <div class="avatar-opt" data-avatar="⚔️" onclick="selectAvatar(this)">⚔️</div>
+          <div class="avatar-opt" data-avatar="🎭" onclick="selectAvatar(this)">🎭</div>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="handleRegister()">DAFTAR →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-header">
+    <div class="score-badge">⭐ <span id="currentScore">0</span></div>
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="timer-circle" id="timerCircle">
+      <div class="timer-inner" id="timerText">15</div>
+    </div>
+  </div>
+
+  <div class="question-card" id="questionCard">
+    <div class="question-meta">
+      <span class="q-tag" id="questionCategory">General</span>
+      <span class="q-tag" style="background:rgba(255,215,38,0.2);color:var(--yellow);border-color:rgba(255,215,38,0.3);" id="questionDiff">Medium</span>
+    </div>
+    <p class="question-text" id="questionText">Loading...</p>
+  </div>
+
+  <div class="answers-grid" id="answersGrid"></div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div class="screen" id="screen-result">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <div class="result-title" id="resultTitle">Keren Banget!</div>
+  <div class="result-score-big" id="resultScore">0</div>
+  <div class="result-label">POIN</div>
+
+  <div class="result-stats">
+    <div class="result-stat correct-stat">
+      <div class="result-stat-num" id="correctCount">0</div>
+      <div class="result-stat-label">Benar ✓</div>
+    </div>
+    <div class="result-stat wrong-stat">
+      <div class="result-stat-num" id="wrongCount">0</div>
+      <div class="result-stat-label">Salah ✗</div>
+    </div>
+    <div class="result-stat time-stat">
+      <div class="result-stat-num" id="timeUsed">0s</div>
+      <div class="result-stat-label">Waktu</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" onclick="startQuiz()">MAIN LAGI! 🎮</button>
+    <button class="btn-outline" onclick="showScreen('screen-leaderboard')">Leaderboard 🏆</button>
+  </div>
+</div>
+
+<!-- ===== LEADERBOARD ===== -->
+<div class="screen" id="screen-leaderboard">
+  <div class="lb-header">
+    <div class="lb-title">🏆 LEADERBOARD</div>
+    <div class="lb-subtitle">Top players OtakuQuiz — siapa yang paling jago?</div>
+  </div>
+
+  <div class="lb-podium" id="podium"></div>
+  <div class="lb-list" id="lbList"></div>
+  
+  <div style="text-align:center;margin-top:2rem;padding-bottom:5rem;">
+    <button class="btn-primary" onclick="startQuiz()">CHALLANGE! 🎮</button>
+  </div>
+</div>
+
+<script>
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://iwvkfxejhubacachspai.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3dmtmeGVqaHViYWNhY2hzcGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MTU5MTMsImV4cCI6MjA4Nzk5MTkxM30.B5BcB58G510qeni_rsDZLdDvcliN30MiHd1w6ELzHGI';
+
+async function sbFetch(path, method = 'GET', body = null) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : null
+    });
+    return res.json();
+  } catch(e) {
+    console.warn('Supabase fetch error:', e);
+    return null;
+  }
+}
+
+async function registerToSupabase(username, password, avatar) {
+  return sbFetch('users', 'POST', { username, password, avatar });
+}
+
+async function loginFromSupabase(username, password) {
+  const data = await sbFetch(`users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=*`);
+  return (data && data[0]) || null;
+}
+
+async function saveScore(username, avatar, score, correct) {
+  return sbFetch('scores', 'POST', { username, avatar, score, correct, total: 10 });
+}
+
+async function getLeaderboard() {
+  const data = await sbFetch('scores?select=username,avatar,score&order=score.desc&limit=20');
+  return data || [];
+}
+
+// ===== DATA =====
+const questions = [
+  { q: "Siapa pencipta anime/manga 'Naruto'?", options: ["Masashi Kishimoto","Eiichiro Oda","Akira Toriyama","Tite Kubo"], ans: 0, cat: "Trivia", diff: "Easy" },
+  { q: "Di anime One Piece, buah iblis apa yang dimakan Monkey D. Luffy?", options: ["Mera Mera no Mi","Gomu Gomu no Mi","Gura Gura no Mi","Yami Yami no Mi"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Anime mana yang menampilkan karakter bernama 'Levi Ackerman'?", options: ["Fullmetal Alchemist","Demon Slayer","Attack on Titan","Jujutsu Kaisen"], ans: 2, cat: "Action", diff: "Easy" },
+  { q: "Studio animasi mana yang memproduksi 'Spirited Away' (Sen to Chihiro)?", options: ["Toei Animation","Madhouse","Studio Ghibli","Kyoto Animation"], ans: 2, cat: "Studio", diff: "Easy" },
+  { q: "Dalam Naruto, apa nama teknik rahasia milik Naruto yang paling terkenal?", options: ["Rasengan","Chidori","Shadow Clone Jutsu","Amaterasu"], ans: 0, cat: "Naruto", diff: "Easy" },
+  { q: "Anime 'Dragon Ball' dibuat oleh siapa?", options: ["Yoshihiro Togashi","Akira Toriyama","Naoki Urasawa","Rumiko Takahashi"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Karakter mana yang memiliki kekuatan 'Nen' di Hunter x Hunter?", options: ["Ichigo Kurosaki","Gon Freecss","Naruto Uzumaki","Edward Elric"], ans: 1, cat: "HxH", diff: "Medium" },
+  { q: "Di Demon Slayer, breathing style apa yang digunakan Tanjiro Kamado?", options: ["Thunder Breathing","Flame Breathing","Water Breathing","Wind Breathing"], ans: 2, cat: "Kimetsu", diff: "Medium" },
+  { q: "Manga 'Berserk' dibuat oleh siapa?", options: ["Kentaro Miura","Hajime Isayama","Yoshihiro Togashi","Naoki Urasawa"], ans: 0, cat: "Manga", diff: "Medium" },
+  { q: "Dalam Fullmetal Alchemist: Brotherhood, apa yang Edward dan Alphonse Elric cari?", options: ["Holy Grail","Philosopher's Stone","Dragon Ball","Death Note"], ans: 1, cat: "FMA", diff: "Medium" },
+  { q: "Anime 'Neon Genesis Evangelion' dibuat oleh studio apa?", options: ["Gainax","Madhouse","Bones","MAPPA"], ans: 0, cat: "Classic", diff: "Medium" },
+  { q: "Di JoJo's Bizarre Adventure, apa nama Stand milik Jotaro Kujo?", options: ["The World","Star Platinum","Crazy Diamond","Gold Experience"], ans: 1, cat: "JoJo", diff: "Medium" },
+  { q: "Berapa jumlah Titan Shifter yang ada dalam Attack on Titan?", options: ["7","9","10","12"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Dalam One Piece, apa nama teknik serangan 'Gear Fourth' dari Luffy?", options: ["Boundman","Snakeman","Tankman","Gearman"], ans: 0, cat: "One Piece", diff: "Hard" },
+  { q: "Siapa yang menulis light novel 'Sword Art Online'?", options: ["Reki Kawahara","Kazuma Kamachi","Kugane Maruyama","Tappei Nagatsuki"], ans: 0, cat: "LN", diff: "Hard" },
+  { q: "Di anime 'Code Geass', kekuatan Geass milik Lelouch memiliki kemampuan apa?", options: ["Melihat masa depan","Membaca pikiran","Memberikan perintah mutlak","Menghentikan waktu"], ans: 2, cat: "Code Geass", diff: "Hard" },
+  { q: "Manga 'Vagabond' adalah adaptasi dari novel apa?", options: ["Musashi","Taiko","Itto","Shogun"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di Jujutsu Kaisen, Cursed Technique milik Gojo Satoru adalah...", options: ["Infinity","Limitless","Six Eyes","Ten Shadows"], ans: 1, cat: "JJK", diff: "Hard" },
+  { q: "Anime pertama yang menang Oscar untuk film animasi terbaik adalah...", options: ["Princess Mononoke","My Neighbor Totoro","Spirited Away","Howl's Moving Castle"], ans: 2, cat: "Trivia", diff: "Medium" },
+  { q: "Karakter 'L' di Death Note memiliki nama asli apa?", options: ["L Lawliet","L Williams","L Moriarty","Tidak pernah disebutkan"], ans: 0, cat: "Death Note", diff: "Medium" },
+];
+
+// ===== STATE =====
+let users = JSON.parse(localStorage.getItem('oq_users') || '[]');
+let currentUser = JSON.parse(localStorage.getItem('oq_current') || 'null');
+let gameState = {
+  questions: [],
+  current: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  timer: null,
+  timeLeft: 15,
+  startTime: 0,
+  totalTime: 0,
+};
+let selectedAvatar = '🦊';
+
+// ===== INIT =====
+window.onload = () => {
+  createParticles();
+  if (currentUser) {
+    document.getElementById('bottomNav').style.display = 'flex';
+  }
+  renderLeaderboard();
+};
+
+function createParticles() {
+  const emojis = ['⚔️','🌸','⭐','🔥','💫','🎌','🌙','⚡'];
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(p);
+  }
+}
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-leaderboard') renderLeaderboard();
+}
+
+// ===== AUTH =====
+function switchTab(tab) {
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+}
+
+function selectAvatar(el) {
+  document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAvatar = el.dataset.avatar;
+}
+
+async function handleLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password) { showToast('Isi username & password dulu!', 'error'); return; }
+
+  showToast('Logging in...', 'success');
+
+  // Cek lokal dulu
+  let user = users.find(u => u.username === username && u.password === password);
+
+  // Kalau tidak ada lokal, cek ke Supabase
+  if (!user) {
+    const sbUser = await loginFromSupabase(username, password);
+    if (sbUser) {
+      user = { username: sbUser.username, password, avatar: sbUser.avatar, highScore: 0, gamesPlayed: 0 };
+      users.push(user);
+      localStorage.setItem('oq_users', JSON.stringify(users));
+    }
+  }
+
+  if (!user) { showToast('Username atau password salah!', 'error'); return; }
+
+  currentUser = user;
+  localStorage.setItem('oq_current', JSON.stringify(user));
+  document.getElementById('bottomNav').style.display = 'flex';
+  showToast(`Welcome back, ${user.username}! ${user.avatar}`, 'success');
+  setTimeout(() => startQuiz(), 1000);
+}
+
+async function handleRegister() {
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!username || !password) { showToast('Isi semua field dulu!', 'error'); return; }
+  if (username.length < 3) { showToast('Username minimal 3 karakter!', 'error'); return; }
+  if (users.find(u => u.username === username)) { showToast('Username sudah dipakai!', 'error'); return; }
+
+  showToast('Mendaftar...', 'success');
+
+  // Simpan ke Supabase
+  const result = await registerToSupabase(username, password, selectedAvatar);
+  if (!result || result.error) {
+    // Cek apakah error karena username sudah ada di Supabase
+    if (result && result.code === '23505') {
+      showToast('Username sudah dipakai!', 'error'); return;
+    }
+    // Kalau Supabase error lain, tetap lanjut simpan lokal
+    console.warn('Supabase register error:', result);
+  }
+
+  const newUser = { username, password, avatar: selectedAvatar, highScore: 0, gamesPlayed: 0 };
+  users.push(newUser);
+  localStorage.setItem('oq_users', JSON.stringify(users));
+  currentUser = newUser;
+  localStorage.setItem('oq_current', JSON.stringify(newUser));
+  document.getElementById('bottomNav').style.display = 'flex';
+  showToast(`Selamat datang, ${username}! ${selectedAvatar}`, 'success');
+  setTimeout(() => startQuiz(), 1000);
+}
+
+function guestPlay() {
+  currentUser = { username: 'Tamu', avatar: '👤', highScore: 0, gamesPlayed: 0, isGuest: true };
+  showToast('Main sebagai tamu — skor tidak akan disimpan!', 'error');
+  setTimeout(() => startQuiz(), 1000);
+}
+
+// ===== QUIZ =====
+function startQuiz() {
+  const shuffled = [...questions].sort(() => Math.random() - 0.5).slice(0, 10);
+  gameState = {
+    questions: shuffled,
+    current: 0,
+    score: 0,
+    correct: 0,
+    wrong: 0,
+    timer: null,
+    timeLeft: 15,
+    startTime: Date.now(),
+    totalTime: 0,
+  };
+  showScreen('screen-quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = gameState.questions[gameState.current];
+  const total = gameState.questions.length;
+  const progress = ((gameState.current) / total) * 100;
+  
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('currentScore').textContent = gameState.score;
+  document.getElementById('questionCategory').textContent = q.cat;
+  document.getElementById('questionDiff').textContent = q.diff;
+  document.getElementById('questionText').textContent = `Q${gameState.current + 1}/${total}: ${q.q}`;
+
+  // Rebuild answers
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  const shuffledOpts = q.options.map((opt, i) => ({ text: opt, origIdx: i }))
+    .sort(() => Math.random() - 0.5);
+  
+  gameState.shuffledOpts = shuffledOpts;
+
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="answer-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    grid.appendChild(btn);
+  });
+
+  // Timer
+  clearInterval(gameState.timer);
+  gameState.timeLeft = 15;
+  updateTimer();
+  gameState.timer = setInterval(() => {
+    gameState.timeLeft--;
+    updateTimer();
+    if (gameState.timeLeft <= 0) {
+      clearInterval(gameState.timer);
+      timeUp();
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const pct = (gameState.timeLeft / 15) * 100;
+  const color = gameState.timeLeft > 7 ? 'var(--cyan)' : gameState.timeLeft > 3 ? 'var(--yellow)' : 'var(--pink)';
+  document.getElementById('timerCircle').style.background = `conic-gradient(${color} ${pct}%, var(--card2) ${pct}%)`;
+  document.getElementById('timerText').textContent = gameState.timeLeft;
+  document.getElementById('timerText').style.color = color;
+}
+
+function selectAnswer(selectedIdx, btn) {
+  clearInterval(gameState.timer);
+  const q = gameState.questions[gameState.current];
+  const isCorrect = gameState.shuffledOpts[selectedIdx].origIdx === q.ans;
+  
+  // Disable all buttons
+  document.querySelectorAll('.answer-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (gameState.shuffledOpts[i].origIdx === q.ans) b.classList.add('correct');
+  });
+  if (!isCorrect) btn.classList.add('wrong');
+
+  if (isCorrect) {
+    const timeBonus = Math.ceil(gameState.timeLeft * 10);
+    const points = 100 + timeBonus;
+    gameState.score += points;
+    gameState.correct++;
+    document.getElementById('currentScore').textContent = gameState.score;
+    showToast(`+${points} poin! Benar! ✓ (time bonus: +${timeBonus})`, 'success');
+  } else {
+    gameState.wrong++;
+    showToast('Salah! 💀', 'error');
+  }
+
+  setTimeout(nextQuestion, 1500);
+}
+
+function timeUp() {
+  const q = gameState.questions[gameState.current];
+  document.querySelectorAll('.answer-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (gameState.shuffledOpts[i].origIdx === q.ans) b.classList.add('correct');
+  });
+  gameState.wrong++;
+  showToast('Waktu habis! ⏱️', 'error');
+  setTimeout(nextQuestion, 1500);
+}
+
+function nextQuestion() {
+  gameState.current++;
+  if (gameState.current >= gameState.questions.length) {
+    endGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+async function endGame() {
+  clearInterval(gameState.timer);
+  gameState.totalTime = Math.round((Date.now() - gameState.startTime) / 1000);
+
+  // Save score lokal
+  if (currentUser && !currentUser.isGuest) {
+    const userIdx = users.findIndex(u => u.username === currentUser.username);
+    if (userIdx !== -1) {
+      users[userIdx].gamesPlayed = (users[userIdx].gamesPlayed || 0) + 1;
+      if (gameState.score > (users[userIdx].highScore || 0)) {
+        users[userIdx].highScore = gameState.score;
+      }
+      localStorage.setItem('oq_users', JSON.stringify(users));
+      currentUser = users[userIdx];
+      localStorage.setItem('oq_current', JSON.stringify(currentUser));
+    }
+
+    // Simpan skor ke Supabase
+    await saveScore(currentUser.username, currentUser.avatar || '🦊', gameState.score, gameState.correct);
+  }
+
+  // Show result
+  const pct = gameState.correct / gameState.questions.length;
+  let emoji, title;
+  if (pct >= 0.9) { emoji = '🏆'; title = 'OTAKU SEJATI!'; }
+  else if (pct >= 0.7) { emoji = '🎉'; title = 'Keren Banget!'; }
+  else if (pct >= 0.5) { emoji = '👍'; title = 'Lumayan Nih!'; }
+  else { emoji = '📚'; title = 'Belajar Lagi Yuk~'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultScore').textContent = gameState.score;
+  document.getElementById('correctCount').textContent = gameState.correct;
+  document.getElementById('wrongCount').textContent = gameState.wrong;
+  document.getElementById('timeUsed').textContent = gameState.totalTime + 's';
+
+  showScreen('screen-result');
+  if (pct >= 0.7) launchConfetti();
+}
+
+// ===== LEADERBOARD =====
+async function renderLeaderboard() {
+  const podium = document.getElementById('podium');
+  const list = document.getElementById('lbList');
+  list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem;font-weight:700;">Loading... ⏳</div>';
+
+  // Ambil dari Supabase, fallback ke lokal
+  let allScores = await getLeaderboard();
+  if (!allScores || allScores.length === 0) {
+    allScores = users.map(u => ({ username: u.username, avatar: u.avatar || '👤', score: u.highScore || 0 }));
+  }
+
+  const sorted = allScores.sort((a, b) => b.score - a.score);
+  const top3 = sorted.slice(0, 3);
+
+  // Podium
+  const order = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
+  const classes = ['p2', 'p1', 'p3'];
+  const crowns = ['🥈', '👑', '🥉'];
+  podium.innerHTML = order.map((u, i) => u ? `
+    <div class="podium-place ${classes[i]}">
+      <span class="crown">${crowns[i]}</span>
+      <span class="podium-avatar">${u.avatar || '👤'}</span>
+      <span class="podium-name">${u.username}</span>
+      <span class="podium-score">${u.score || 0}</span>
+    </div>
+  ` : `<div class="podium-place ${classes[i]}"><span style="color:var(--muted);font-size:0.75rem;font-weight:700;">???</span></div>`).join('');
+
+  // List
+  if (sorted.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem;font-weight:700;">Belum ada pemain. Jadilah yang pertama! 🚀</div>';
+    return;
+  }
+  list.innerHTML = sorted.map((u, i) => `
+    <div class="lb-item ${currentUser && u.username === currentUser.username ? 'is-me' : ''}">
+      <span class="lb-rank">${i + 1}</span>
+      <span class="lb-avatar">${u.avatar || '👤'}</span>
+      <div class="lb-info">
+        <div class="lb-name">${u.username}</div>
+        <div class="lb-meta">Score: ${u.score || 0}</div>
+      </div>
+      <span class="lb-score-val">${u.score || 0}</span>
+    </div>
+  `).join('');
+}
+
+// ===== UTILS =====
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function launchConfetti() {
+  const colors = ['#FF3D8B','#FFD726','#00E5FF','#9B5DE5','#FF6B35','#00FF88'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    if (Math.random() > 0.5) { c.style.borderRadius = '50%'; }
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+</script>
+</body>
+</html>
