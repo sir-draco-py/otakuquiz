@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OtakuQuiz — Uji Pengetahuan Anime & Manga Kamu!</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎌</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='36' y2='36' gradientUnits='userSpaceOnUse'><stop offset='0%25' stop-color='%23FF3D8B'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><path d='M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z' fill='url(%23g)' opacity='.2'/><path d='M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z' stroke='url(%23g)' stroke-width='1.5' fill='none'/><text x='18' y='24' font-family='Arial' font-weight='bold' font-size='16' fill='url(%23g)' text-anchor='middle'>Q</text><circle cx='10' cy='10' r='1.5' fill='%23FFD726' opacity='.9'/><circle cx='26' cy='10' r='1.5' fill='%23FFD726' opacity='.9'/><circle cx='18' cy='5' r='1' fill='%23FF3D8B' opacity='.9'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -304,6 +304,74 @@
     .stats-row { gap: 0.8rem; }
     .result-stats { gap: 0.6rem; }
   }
+
+  /* ===== LOGO SVG ===== */
+  .logo-svg-wrap {
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+  }
+  .logo-svg-wrap svg { width: 36px; height: 36px; flex-shrink: 0; }
+  .logo-svg-text {
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* ===== WATERMARK ===== */
+  .watermark {
+    position: fixed;
+    font-family: 'Bangers', cursive;
+    font-size: 0.85rem; letter-spacing: 2px;
+    color: rgba(255,255,255,0.07);
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .watermark-br {
+    bottom: 1rem; right: 1.2rem;
+    transform: rotate(-15deg);
+  }
+  .watermark-tl {
+    top: 4.5rem; left: 1.2rem;
+    transform: rotate(15deg);
+  }
+
+  /* ===== E-CATALOGUE MODAL ===== */
+  .cat-modal-box { max-width: 600px; }
+  .cat-modal-title {
+    font-family: 'Bangers', cursive; font-size: 2.2rem; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-align: center; margin-bottom: 0.3rem;
+  }
+  .cat-modal-sub { color: var(--muted); font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; max-height: 420px; overflow-y: auto; }
+  .cat-card {
+    background: var(--card2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 1rem;
+    transition: all 0.2s; cursor: default;
+  }
+  .cat-card:hover { border-color: var(--pink); transform: translateY(-2px); }
+  .cat-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+  .cat-card-emoji { font-size: 1.8rem; }
+  .cat-card-name { font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
+  .cat-card-desc { font-size: 0.78rem; color: var(--muted); font-weight: 600; line-height: 1.4; margin-bottom: 0.6rem; }
+  .cat-card-footer { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .diff-badge { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px; }
+  .diff-easy { background: rgba(0,255,136,0.15); color: #00FF88; border: 1px solid rgba(0,255,136,0.3); }
+  .diff-medium { background: rgba(255,215,38,0.15); color: var(--yellow); border: 1px solid rgba(255,215,38,0.3); }
+  .diff-hard { background: rgba(255,61,139,0.15); color: var(--pink); border: 1px solid rgba(255,61,139,0.3); }
+  .cat-count { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; background: rgba(155,93,229,0.15); color: var(--purple); border: 1px solid rgba(155,93,229,0.3); }
+  .cat-btn-topbar {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    padding: 0.3rem 0.8rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .cat-btn-topbar:hover { border-color: var(--purple); color: var(--purple); }
 </style>
 </head>
 <body>
@@ -311,10 +379,34 @@
 <div class="particles" id="particles"></div>
 <div class="toast" id="toast"></div>
 
+<!-- ===== WATERMARK ===== -->
+<div class="watermark watermark-br">© Faizal Kurniawan — OtakuQuiz</div>
+<div class="watermark watermark-tl">🎌 Faizal Kurniawan — OtakuQuiz 2026</div>
+
 <!-- ===== TOPBAR ===== -->
 <div class="topbar">
-  <div class="topbar-logo" onclick="goHome()">🎌 OtakuQuiz</div>
+  <div class="logo-svg-wrap" onclick="goHome()">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FF3D8B"/>
+          <stop offset="100%" stop-color="#00E5FF"/>
+        </linearGradient>
+      </defs>
+      <!-- Shield shape -->
+      <path d="M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z" fill="url(#logoGrad)" opacity="0.15"/>
+      <path d="M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z" stroke="url(#logoGrad)" stroke-width="1.5" fill="none"/>
+      <!-- Q letter -->
+      <text x="18" y="24" font-family="Bangers, cursive" font-size="16" fill="url(#logoGrad)" text-anchor="middle" letter-spacing="1">Q</text>
+      <!-- Star accents -->
+      <circle cx="10" cy="10" r="1.5" fill="#FFD726" opacity="0.8"/>
+      <circle cx="26" cy="10" r="1.5" fill="#FFD726" opacity="0.8"/>
+      <circle cx="18" cy="5" r="1" fill="#FF3D8B" opacity="0.9"/>
+    </svg>
+    <span class="logo-svg-text">OtakuQuiz</span>
+  </div>
   <div class="topbar-right" id="topbarRight">
+    <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
     <button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>
   </div>
 </div>
@@ -449,6 +541,127 @@
     <div class="lb-podium" id="lbPodium"></div>
     <div class="lb-list" id="lbList">
       <div class="lb-loading">Loading... ⏳</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: E-CATALOGUE ===== -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box cat-modal-box">
+    <button class="modal-close" onclick="closeCatalogue()">✕</button>
+    <div class="cat-modal-title">📖 E-Catalogue</div>
+    <div class="cat-modal-sub">Semua kategori soal yang tersedia di OtakuQuiz</div>
+    <div class="cat-grid">
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">⚔️</span>
+          <span class="cat-card-name">Action</span>
+        </div>
+        <div class="cat-card-desc">Soal seputar anime action paling populer seperti Attack on Titan, Demon Slayer, dan Jujutsu Kaisen.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">10+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🏴‍☠️</span>
+          <span class="cat-card-name">One Piece</span>
+        </div>
+        <div class="cat-card-desc">Uji pengetahuanmu tentang dunia bajak laut — dari buah iblis, Haki, hingga teknik Gear Luffy!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">8+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🍥</span>
+          <span class="cat-card-name">Naruto</span>
+        </div>
+        <div class="cat-card-desc">Dari jutsu, klan, hingga fakta tersembunyi dunia shinobi yang hanya diketahui true fans!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="cat-count">6+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">📚</span>
+          <span class="cat-card-name">Manga</span>
+        </div>
+        <div class="cat-card-desc">Soal tentang manga legendaris seperti Berserk, Vagabond, Vinland Saga, dan karya mangaka ternama.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">6+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🔮</span>
+          <span class="cat-card-name">Isekai & Sci-Fi</span>
+        </div>
+        <div class="cat-card-desc">Soal dari anime isekai & sci-fi hits seperti Re:Zero, Steins;Gate, Overlord, dan Sword Art Online.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">7+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🎬</span>
+          <span class="cat-card-name">Trivia & Studio</span>
+        </div>
+        <div class="cat-card-desc">Fakta unik seputar industri anime — studio, sutradara, penghargaan, dan hal-hal di balik layar!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="cat-count">8+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">💀</span>
+          <span class="cat-card-name">Dark Anime</span>
+        </div>
+        <div class="cat-card-desc">Soal dari anime bertema gelap seperti Tokyo Ghoul, Death Note, Code Geass, dan Hunter x Hunter.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">6+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🌟</span>
+          <span class="cat-card-name">Classic</span>
+        </div>
+        <div class="cat-card-desc">Anime legendaris yang membentuk industri anime modern — dari EVA, Dragon Ball, hingga Bleach!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">5+ soal</span>
+        </div>
+      </div>
+
+    </div>
+    <div style="text-align:center;margin-top:1.2rem;">
+      <button class="btn-primary" style="font-size:1.1rem;padding:0.8rem 2rem;" onclick="closeCatalogue(); handlePlayBtn();">MAIN SEKARANG! 🚀</button>
     </div>
   </div>
 </div>
@@ -608,6 +821,7 @@ function updateTopbar() {
   const right = document.getElementById('topbarRight');
   if (currentUser) {
     right.innerHTML = `
+      <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
       <div class="profile-chip">
         <span class="av">${currentUser.avatar || '👤'}</span>
         <span class="uname">${currentUser.username}</span>
@@ -615,8 +829,19 @@ function updateTopbar() {
       <button class="btn-logout" onclick="handleLogout()">Logout</button>
     `;
   } else {
-    right.innerHTML = `<button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>`;
+    right.innerHTML = `
+      <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+      <button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>
+    `;
   }
+}
+
+// ===== E-CATALOGUE =====
+function openCatalogue() {
+  document.getElementById('catModal').classList.add('show');
+}
+function closeCatalogue() {
+  document.getElementById('catModal').classList.remove('show');
 }
 
 // ===== NAVIGATION =====
@@ -1013,6 +1238,9 @@ document.getElementById('authModal').addEventListener('click', function(e) {
 });
 document.getElementById('lbModal').addEventListener('click', function(e) {
   if (e.target === this) closeLeaderboard();
+});
+document.getElementById('catModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCatalogue();
 });
 </script>
 </body>
