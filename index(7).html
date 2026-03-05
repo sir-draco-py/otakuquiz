@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OtakuQuiz — Uji Pengetahuan Anime & Manga Kamu!</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='36' y2='36' gradientUnits='userSpaceOnUse'><stop offset='0%25' stop-color='%23FF3D8B'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><path d='M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z' fill='url(%23g)' opacity='.2'/><path d='M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z' stroke='url(%23g)' stroke-width='1.5' fill='none'/><text x='18' y='24' font-family='Arial' font-weight='bold' font-size='16' fill='url(%23g)' text-anchor='middle'>Q</text><circle cx='10' cy='10' r='1.5' fill='%23FFD726' opacity='.9'/><circle cx='26' cy='10' r='1.5' fill='%23FFD726' opacity='.9'/><circle cx='18' cy='5' r='1' fill='%23FF3D8B' opacity='.9'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF3D8B;
+    --yellow: #FFD726;
+    --cyan: #00E5FF;
+    --purple: #9B5DE5;
+    --orange: #FF6B35;
+    --bg: #0D0D1A;
+    --card: #16162A;
+    --card2: #1E1E38;
+    --text: #F0F0FF;
+    --muted: #8888AA;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(255,61,139,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(155,93,229,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 30%, rgba(0,229,255,0.08) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== PAGES ===== */
+  .page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .page.active { display: flex; flex-direction: column; }
+
+  /* ===== PARTICLES ===== */
+  .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute; font-size: 1.5rem; opacity: 0.12;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.12; }
+    90% { opacity: 0.12; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 56px;
+    background: rgba(13,13,26,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem;
+    z-index: 50;
+  }
+  .topbar-logo {
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    cursor: pointer;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+  .profile-chip {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem; font-weight: 700;
+  }
+  .profile-chip:hover { border-color: var(--pink); }
+  .profile-chip .av { font-size: 1.2rem; }
+  .profile-chip .uname { color: var(--text); }
+  .btn-logout {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    padding: 0.3rem 0.8rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-logout:hover { border-color: #FF4444; color: #FF4444; }
+  .btn-topbar-login {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; border: none;
+    font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px;
+    padding: 0.35rem 1.2rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-topbar-login:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,61,139,0.4); }
+
+  /* ===== BUTTONS ===== */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), var(--orange));
+    color: white; border: none;
+    font-family: 'Bangers', cursive; font-size: 1.4rem; letter-spacing: 2px;
+    padding: 1rem 3rem; border-radius: 50px; cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 30px rgba(255,61,139,0.4);
+    position: relative; overflow: hidden;
+  }
+  .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 40px rgba(255,61,139,0.6); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary {
+    background: transparent; color: var(--cyan);
+    border: 2px solid var(--cyan);
+    font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 2px;
+    padding: 0.8rem 2rem; border-radius: 50px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(0,229,255,0.1); transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent; border: 2px solid rgba(255,255,255,0.2); color: var(--text);
+    font-family: 'Bangers', cursive; font-size: 1.1rem; letter-spacing: 2px;
+    padding: 0.8rem 2rem; border-radius: 50px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+  /* ===== PAGE: HOME ===== */
+  #page-home {
+    align-items: center; justify-content: center;
+    text-align: center; padding: 5rem 2rem 2rem;
+  }
+  .logo-badge {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; font-family: 'Bangers', cursive;
+    font-size: 0.9rem; letter-spacing: 3px;
+    padding: 6px 18px; border-radius: 50px; margin-bottom: 1.5rem;
+    display: inline-block; animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  .hero-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(4rem, 12vw, 8rem);
+    line-height: 0.9; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--yellow) 40%, var(--cyan) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: titlePop 0.8s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes titlePop { 0%{transform:scale(0.5) rotate(-5deg);opacity:0} 100%{transform:scale(1) rotate(0deg);opacity:1} }
+  .hero-sub { font-size: 1.1rem; color: var(--muted); margin-bottom: 3rem; font-weight: 600; animation: fadeInUp 0.8s 0.3s ease both; }
+  @keyframes fadeInUp { 0%{transform:translateY(20px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+  .stats-row { display: flex; gap: 2rem; justify-content: center; margin-bottom: 3rem; animation: fadeInUp 0.8s 0.5s ease both; flex-wrap: wrap; }
+  .stat-item { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 1.5rem; text-align: center; }
+  .stat-num { font-family: 'Bangers', cursive; font-size: 2rem; color: var(--yellow); letter-spacing: 1px; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .home-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; animation: fadeInUp 0.8s 0.7s ease both; }
+  .category-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-top: 3rem; max-width: 500px; animation: fadeInUp 0.8s 0.9s ease both; }
+  .cat-chip { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.6rem; font-size: 0.8rem; font-weight: 800; color: var(--muted); text-align: center; transition: all 0.2s; }
+  .cat-chip:hover { border-color: var(--pink); color: var(--pink); transform: scale(1.05); }
+  .cat-chip .emoji { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+
+  /* ===== PAGE: QUIZ ===== */
+  #page-quiz { padding: 5rem 1.5rem 2rem; align-items: stretch; }
+  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+  .quiz-progress-bar { flex: 1; height: 8px; background: var(--card2); border-radius: 4px; margin: 0 1rem; overflow: hidden; }
+  .quiz-progress-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--yellow)); border-radius: 4px; transition: width 0.5s ease; }
+  .score-badge { background: var(--card); border: 1px solid rgba(255,215,38,0.3); border-radius: 50px; padding: 0.4rem 1rem; font-family: 'Bangers', cursive; font-size: 1.1rem; color: var(--yellow); letter-spacing: 1px; white-space: nowrap; }
+  .timer-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
+  .timer-svg { position: absolute; top: 0; left: 0; width: 60px; height: 60px; transform: rotate(-90deg); }
+  .timer-track { fill: none; stroke: var(--card2); stroke-width: 4; }
+  .timer-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+  .timer-inner { font-family: 'Bangers', cursive; font-size: 1.3rem; position: relative; z-index: 1; }
+  .question-card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 2rem; max-width: 700px; margin: 0 auto 1.5rem; position: relative; overflow: hidden; animation: cardSlideIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes cardSlideIn { 0%{transform:translateX(60px);opacity:0} 100%{transform:translateX(0);opacity:1} }
+  .question-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--purple),var(--pink),var(--cyan)); }
+  .question-meta { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .q-tag { border-radius: 50px; padding: 3px 12px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+  .q-tag-cat { background: rgba(155,93,229,0.2); color: var(--purple); border: 1px solid rgba(155,93,229,0.3); }
+  .q-tag-diff { background: rgba(255,215,38,0.2); color: var(--yellow); border: 1px solid rgba(255,215,38,0.3); }
+  .question-text { font-size: 1.2rem; font-weight: 800; line-height: 1.5; }
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; max-width: 700px; margin: 0 auto; }
+  .answer-btn { background: var(--card); border: 2px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 1.2rem; color: var(--text); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; text-align: left; display: flex; align-items: center; gap: 0.8rem; animation: fadeInUp 0.4s ease both; }
+  .answer-btn:nth-child(1){animation-delay:0.05s} .answer-btn:nth-child(2){animation-delay:0.1s} .answer-btn:nth-child(3){animation-delay:0.15s} .answer-btn:nth-child(4){animation-delay:0.2s}
+  .answer-btn:hover:not(:disabled) { border-color: var(--pink); background: rgba(255,61,139,0.1); transform: translateY(-2px); }
+  .answer-btn:disabled { cursor: not-allowed; }
+  .answer-btn.correct { border-color: #00FF88; background: rgba(0,255,136,0.15); color: #00FF88; }
+  .answer-btn.wrong { border-color: #FF4444; background: rgba(255,68,68,0.15); color: #FF4444; }
+  .answer-letter { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-family: 'Bangers', cursive; font-size: 1rem; flex-shrink: 0; }
+  .answer-btn.correct .answer-letter { background: rgba(0,255,136,0.2); color: #00FF88; }
+  .answer-btn.wrong .answer-letter { background: rgba(255,68,68,0.2); color: #FF4444; }
+
+  /* ===== PAGE: RESULT ===== */
+  #page-result { align-items: center; justify-content: center; padding: 5rem 2rem 2rem; text-align: center; }
+  .result-emoji { font-size: 5rem; margin-bottom: 1rem; animation: bounceIn 0.8s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes bounceIn { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.2);opacity:1} 100%{transform:scale(1)} }
+  .result-title { font-family: 'Bangers', cursive; font-size: 3.5rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--yellow),var(--orange)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; margin-bottom: 0.5rem; }
+  .result-score-big { font-family: 'Bangers', cursive; font-size: 6rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--pink),var(--cyan)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; line-height: 1; margin-bottom: 0.5rem; animation: scoreCount 1s ease both 0.3s; }
+  @keyframes scoreCount { 0%{transform:scale(0.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+  .result-label { color: var(--muted); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem; }
+  .result-stats { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap; }
+  .result-stat { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 1.5rem; min-width: 90px; }
+  .result-stat-num { font-family: 'Bangers', cursive; font-size: 2rem; letter-spacing: 1px; }
+  .result-stat-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .correct-stat .result-stat-num { color: #00FF88; }
+  .wrong-stat .result-stat-num { color: #FF4444; }
+  .time-stat .result-stat-num { color: var(--cyan); }
+  .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+  /* ===== MODAL (Login & Leaderboard) ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    width: 100%; max-width: 440px;
+    position: relative;
+    transform: translateY(30px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.show .modal-box { transform: translateY(0) scale(1); }
+  .modal-box::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--pink),var(--purple),var(--cyan)); }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.08); border: none; color: var(--muted); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .modal-close:hover { background: rgba(255,68,68,0.2); color: #FF4444; }
+
+  /* Auth modal content */
+  .auth-title { font-family: 'Bangers', cursive; font-size: 2.5rem; letter-spacing: 2px; margin-bottom: 0.3rem; background: linear-gradient(135deg,var(--pink),var(--cyan)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+  .auth-subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; font-weight: 600; }
+  .tab-row { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 1.5rem; }
+  .tab-btn { flex: 1; padding: 0.6rem; border: none; background: transparent; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .tab-btn.active { background: linear-gradient(135deg,var(--pink),var(--purple)); color: white; }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-label { display: block; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; }
+  .form-input { width: 100%; background: var(--bg); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.8rem 1rem; color: var(--text); font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600; transition: border-color 0.2s; outline: none; }
+  .form-input:focus { border-color: var(--pink); }
+  .form-input::placeholder { color: var(--muted); }
+  .avatar-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .avatar-opt { width: 44px; height: 44px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: all 0.2s; }
+  .avatar-opt:hover, .avatar-opt.selected { border-color: var(--pink); transform: scale(1.1); }
+
+  /* Leaderboard modal */
+  .lb-modal-box { max-width: 560px; }
+  .lb-title { font-family: 'Bangers', cursive; font-size: 2.5rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--yellow),var(--orange)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; text-align: center; }
+  .lb-subtitle { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-align: center; margin-bottom: 1.5rem; }
+  .lb-podium { display: flex; align-items: flex-end; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; height: 140px; }
+  .podium-place { flex: 1; max-width: 130px; border-radius: 12px 12px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 0.6rem; }
+  .podium-place.p1 { height: 100%; background: linear-gradient(180deg,rgba(255,215,38,0.3),rgba(255,215,38,0.1)); border: 1px solid rgba(255,215,38,0.4); }
+  .podium-place.p2 { height: 75%; background: linear-gradient(180deg,rgba(192,192,192,0.2),rgba(192,192,192,0.05)); border: 1px solid rgba(192,192,192,0.3); }
+  .podium-place.p3 { height: 60%; background: linear-gradient(180deg,rgba(205,127,50,0.2),rgba(205,127,50,0.05)); border: 1px solid rgba(205,127,50,0.3); }
+  .podium-avatar { font-size: 1.6rem; }
+  .podium-name { font-size: 0.7rem; font-weight: 800; text-align: center; padding: 0 4px; }
+  .podium-score { font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px; }
+  .podium-place.p1 .podium-score { color: var(--yellow); }
+  .podium-place.p2 .podium-score { color: #C0C0C0; }
+  .podium-place.p3 .podium-score { color: #CD7F32; }
+  .crown { font-size: 1rem; }
+  .lb-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto; }
+  .lb-item { background: var(--card2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 0.8rem 1rem; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; }
+  .lb-item:hover { border-color: rgba(255,255,255,0.15); }
+  .lb-rank { font-family: 'Bangers', cursive; font-size: 1.2rem; color: var(--muted); width: 24px; text-align: center; }
+  .lb-avatar { font-size: 1.5rem; }
+  .lb-info { flex: 1; }
+  .lb-name { font-weight: 800; font-size: 0.9rem; }
+  .lb-meta { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+  .lb-score-val { font-family: 'Bangers', cursive; font-size: 1.4rem; color: var(--yellow); letter-spacing: 1px; }
+  .lb-item.is-me { border-color: rgba(255,61,139,0.4); background: rgba(255,61,139,0.08); }
+  .lb-item.is-me .lb-name::after { content: ' (Kamu)'; color: var(--pink); font-size: 0.75rem; }
+  .lb-loading { text-align: center; color: var(--muted); padding: 2rem; font-weight: 700; }
+
+  /* ===== TOAST ===== */
+  .toast { position: fixed; top: 4.5rem; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; padding: 0.7rem 1.4rem; font-weight: 800; font-size: 0.85rem; z-index: 300; transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(0,255,136,0.4); color: #00FF88; }
+  .toast.error { border-color: rgba(255,68,68,0.4); color: #FF4444; }
+  .toast.info { border-color: rgba(0,229,255,0.4); color: var(--cyan); }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece { position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 400; animation: confettiFall 3s ease forwards; }
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+  @media (max-width: 500px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .stats-row { gap: 0.8rem; }
+    .result-stats { gap: 0.6rem; }
+  }
+
+  /* ===== LOGO SVG ===== */
+  .logo-svg-wrap {
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+  }
+  .logo-svg-wrap svg { width: 36px; height: 36px; flex-shrink: 0; }
+  .logo-svg-text {
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* ===== WATERMARK ===== */
+  .watermark {
+    position: fixed;
+    font-family: 'Bangers', cursive;
+    font-size: 0.85rem; letter-spacing: 2px;
+    color: rgba(255,255,255,0.07);
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .watermark-br {
+    bottom: 1rem; right: 1.2rem;
+    transform: rotate(-15deg);
+  }
+  .watermark-tl {
+    top: 4.5rem; left: 1.2rem;
+    transform: rotate(15deg);
+  }
+
+  /* ===== E-CATALOGUE MODAL ===== */
+  .cat-modal-box { max-width: 600px; }
+  .cat-modal-title {
+    font-family: 'Bangers', cursive; font-size: 2.2rem; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-align: center; margin-bottom: 0.3rem;
+  }
+  .cat-modal-sub { color: var(--muted); font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; max-height: 420px; overflow-y: auto; }
+  .cat-card {
+    background: var(--card2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 1rem;
+    transition: all 0.2s; cursor: default;
+  }
+  .cat-card:hover { border-color: var(--pink); transform: translateY(-2px); }
+  .cat-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+  .cat-card-emoji { font-size: 1.8rem; }
+  .cat-card-name { font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
+  .cat-card-desc { font-size: 0.78rem; color: var(--muted); font-weight: 600; line-height: 1.4; margin-bottom: 0.6rem; }
+  .cat-card-footer { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .diff-badge { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px; }
+  .diff-easy { background: rgba(0,255,136,0.15); color: #00FF88; border: 1px solid rgba(0,255,136,0.3); }
+  .diff-medium { background: rgba(255,215,38,0.15); color: var(--yellow); border: 1px solid rgba(255,215,38,0.3); }
+  .diff-hard { background: rgba(255,61,139,0.15); color: var(--pink); border: 1px solid rgba(255,61,139,0.3); }
+  .cat-count { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; background: rgba(155,93,229,0.15); color: var(--purple); border: 1px solid rgba(155,93,229,0.3); }
+  .cat-btn-topbar {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    padding: 0.3rem 0.8rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .cat-btn-topbar:hover { border-color: var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== WATERMARK ===== -->
+<div class="watermark watermark-br">© Faizal Kurniawan — OtakuQuiz</div>
+<div class="watermark watermark-tl">🎌 Faizal Kurniawan — OtakuQuiz 2026</div>
+
+<!-- ===== TOPBAR ===== -->
+<div class="topbar">
+  <div class="logo-svg-wrap" onclick="goHome()">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FF3D8B"/>
+          <stop offset="100%" stop-color="#00E5FF"/>
+        </linearGradient>
+      </defs>
+      <!-- Shield shape -->
+      <path d="M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z" fill="url(#logoGrad)" opacity="0.15"/>
+      <path d="M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z" stroke="url(#logoGrad)" stroke-width="1.5" fill="none"/>
+      <!-- Q letter -->
+      <text x="18" y="24" font-family="Bangers, cursive" font-size="16" fill="url(#logoGrad)" text-anchor="middle" letter-spacing="1">Q</text>
+      <!-- Star accents -->
+      <circle cx="10" cy="10" r="1.5" fill="#FFD726" opacity="0.8"/>
+      <circle cx="26" cy="10" r="1.5" fill="#FFD726" opacity="0.8"/>
+      <circle cx="18" cy="5" r="1" fill="#FF3D8B" opacity="0.9"/>
+    </svg>
+    <span class="logo-svg-text">OtakuQuiz</span>
+  </div>
+  <div class="topbar-right" id="topbarRight">
+    <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+    <button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="logo-badge">🎌 OTAKU QUIZ</div>
+  <h1 class="hero-title">OtakuQuiz</h1>
+  <p class="hero-sub">Uji pengetahuan Anime & Manga kamu! Can you reach the top? 🏆</p>
+  <div class="stats-row">
+    <div class="stat-item"><div class="stat-num">60+</div><div class="stat-label">Soal</div></div>
+    <div class="stat-item"><div class="stat-num">6</div><div class="stat-label">Kategori</div></div>
+    <div class="stat-item"><div class="stat-num">∞</div><div class="stat-label">Fun!</div></div>
+  </div>
+  <div class="home-btns">
+    <button class="btn-primary" onclick="handlePlayBtn()">MULAI MAIN! 🚀</button>
+    <button class="btn-secondary" onclick="openLeaderboard()">Leaderboard 🏆</button>
+  </div>
+  <div class="category-grid">
+    <div class="cat-chip"><span class="emoji">⚔️</span>Action</div>
+    <div class="cat-chip"><span class="emoji">🔮</span>Fantasy</div>
+    <div class="cat-chip"><span class="emoji">😂</span>Comedy</div>
+    <div class="cat-chip"><span class="emoji">📚</span>Manga</div>
+    <div class="cat-chip"><span class="emoji">🎵</span>Opening</div>
+    <div class="cat-chip"><span class="emoji">👾</span>Karakter</div>
+  </div>
+</div>
+
+<!-- ===== PAGE: QUIZ ===== -->
+<div class="page" id="page-quiz">
+  <div class="quiz-header">
+    <div class="score-badge">⭐ <span id="currentScore">0</span></div>
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="timer-circle" id="timerCircle">
+      <svg class="timer-svg" viewBox="0 0 60 60">
+        <circle class="timer-track" cx="30" cy="30" r="26"/>
+        <circle class="timer-fill" id="timerArc" cx="30" cy="30" r="26"
+          stroke-dasharray="163.4" stroke-dashoffset="0" stroke="var(--cyan)"/>
+      </svg>
+      <span class="timer-inner" id="timerText">15</span>
+    </div>
+  </div>
+  <div class="question-card" id="questionCard">
+    <div class="question-meta">
+      <span class="q-tag q-tag-cat" id="questionCategory">General</span>
+      <span class="q-tag q-tag-diff" id="questionDiff">Medium</span>
+    </div>
+    <p class="question-text" id="questionText">Loading...</p>
+  </div>
+  <div class="answers-grid" id="answersGrid"></div>
+</div>
+
+<!-- ===== PAGE: RESULT ===== -->
+<div class="page" id="page-result">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <div class="result-title" id="resultTitle">Keren Banget!</div>
+  <div class="result-score-big" id="resultScore">0</div>
+  <div class="result-label">POIN</div>
+  <div class="result-stats">
+    <div class="result-stat correct-stat"><div class="result-stat-num" id="correctCount">0</div><div class="result-stat-label">Benar ✓</div></div>
+    <div class="result-stat wrong-stat"><div class="result-stat-num" id="wrongCount">0</div><div class="result-stat-label">Salah ✗</div></div>
+    <div class="result-stat time-stat"><div class="result-stat-num" id="timeUsed">0s</div><div class="result-stat-label">Waktu</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-primary" onclick="startQuiz()">MAIN LAGI! 🎮</button>
+    <button class="btn-outline" onclick="openLeaderboard()">Leaderboard 🏆</button>
+    <button class="btn-outline" onclick="goHome()">Home 🏠</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: AUTH ===== -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-title">Welcome!</div>
+    <p class="auth-subtitle">Login atau daftar untuk simpan skor kamu</p>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Daftar</button>
+    </div>
+    <!-- Login -->
+    <div id="form-login">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="login-username" type="text" placeholder="Masukkan username...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="login-password" type="password" placeholder="Masukkan password...">
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="handleLogin()">LOGIN →</button>
+      <div style="text-align:center;margin-top:1rem;">
+        <button onclick="guestPlay()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;text-decoration:underline;">Main sebagai tamu</button>
+      </div>
+    </div>
+    <!-- Register -->
+    <div id="form-register" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="reg-username" type="text" placeholder="Pilih username kamu...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="reg-password" type="password" placeholder="Buat password...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pilih Avatar</label>
+        <div class="avatar-row">
+          <div class="avatar-opt selected" data-avatar="🦊" onclick="selectAvatar(this)">🦊</div>
+          <div class="avatar-opt" data-avatar="🐉" onclick="selectAvatar(this)">🐉</div>
+          <div class="avatar-opt" data-avatar="⚡" onclick="selectAvatar(this)">⚡</div>
+          <div class="avatar-opt" data-avatar="🌸" onclick="selectAvatar(this)">🌸</div>
+          <div class="avatar-opt" data-avatar="🔥" onclick="selectAvatar(this)">🔥</div>
+          <div class="avatar-opt" data-avatar="🌙" onclick="selectAvatar(this)">🌙</div>
+          <div class="avatar-opt" data-avatar="⚔️" onclick="selectAvatar(this)">⚔️</div>
+          <div class="avatar-opt" data-avatar="🎭" onclick="selectAvatar(this)">🎭</div>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="handleRegister()">DAFTAR →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: LEADERBOARD ===== -->
+<div class="modal-overlay" id="lbModal">
+  <div class="modal-box lb-modal-box">
+    <button class="modal-close" onclick="closeLeaderboard()">✕</button>
+    <div class="lb-title">🏆 LEADERBOARD</div>
+    <div class="lb-subtitle">Best score tiap player — siapa yang paling jago?</div>
+    <div class="lb-podium" id="lbPodium"></div>
+    <div class="lb-list" id="lbList">
+      <div class="lb-loading">Loading... ⏳</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: E-CATALOGUE ===== -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box cat-modal-box">
+    <button class="modal-close" onclick="closeCatalogue()">✕</button>
+    <div class="cat-modal-title">📖 E-Catalogue</div>
+    <div class="cat-modal-sub">Semua kategori soal yang tersedia di OtakuQuiz</div>
+    <div class="cat-grid">
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">⚔️</span>
+          <span class="cat-card-name">Action</span>
+        </div>
+        <div class="cat-card-desc">Soal seputar anime action paling populer seperti Attack on Titan, Demon Slayer, dan Jujutsu Kaisen.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">10+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🏴‍☠️</span>
+          <span class="cat-card-name">One Piece</span>
+        </div>
+        <div class="cat-card-desc">Uji pengetahuanmu tentang dunia bajak laut — dari buah iblis, Haki, hingga teknik Gear Luffy!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">8+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🍥</span>
+          <span class="cat-card-name">Naruto</span>
+        </div>
+        <div class="cat-card-desc">Dari jutsu, klan, hingga fakta tersembunyi dunia shinobi yang hanya diketahui true fans!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="cat-count">6+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">📚</span>
+          <span class="cat-card-name">Manga</span>
+        </div>
+        <div class="cat-card-desc">Soal tentang manga legendaris seperti Berserk, Vagabond, Vinland Saga, dan karya mangaka ternama.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">6+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🔮</span>
+          <span class="cat-card-name">Isekai & Sci-Fi</span>
+        </div>
+        <div class="cat-card-desc">Soal dari anime isekai & sci-fi hits seperti Re:Zero, Steins;Gate, Overlord, dan Sword Art Online.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">7+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🎬</span>
+          <span class="cat-card-name">Trivia & Studio</span>
+        </div>
+        <div class="cat-card-desc">Fakta unik seputar industri anime — studio, sutradara, penghargaan, dan hal-hal di balik layar!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="cat-count">8+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">💀</span>
+          <span class="cat-card-name">Dark Anime</span>
+        </div>
+        <div class="cat-card-desc">Soal dari anime bertema gelap seperti Tokyo Ghoul, Death Note, Code Geass, dan Hunter x Hunter.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">6+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🌟</span>
+          <span class="cat-card-name">Classic</span>
+        </div>
+        <div class="cat-card-desc">Anime legendaris yang membentuk industri anime modern — dari EVA, Dragon Ball, hingga Bleach!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">5+ soal</span>
+        </div>
+      </div>
+
+    </div>
+    <div style="text-align:center;margin-top:1.2rem;">
+      <button class="btn-primary" style="font-size:1.1rem;padding:0.8rem 2rem;" onclick="closeCatalogue(); handlePlayBtn();">MAIN SEKARANG! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SUPABASE =====
+const SUPABASE_URL = 'https://iwvkfxejhubacachspai.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3dmtmeGVqaHViYWNhY2hzcGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MTU5MTMsImV4cCI6MjA4Nzk5MTkxM30.B5BcB58G510qeni_rsDZLdDvcliN30MiHd1w6ELzHGI';
+
+async function sbFetch(path, method = 'GET', body = null) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : null
+    });
+    return res.json();
+  } catch(e) { console.warn('Supabase error:', e); return null; }
+}
+
+async function registerToSupabase(username, password, avatar) {
+  return sbFetch('users', 'POST', { username, password, avatar });
+}
+async function loginFromSupabase(username, password) {
+  const data = await sbFetch(`users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=*`);
+  return (data && data[0]) || null;
+}
+async function saveScore(username, avatar, score, correct) {
+  return sbFetch('scores', 'POST', { username, avatar, score, correct, total: 10 });
+}
+async function getLeaderboard() {
+  // Ambil best score per user menggunakan RPC atau fallback manual
+  const data = await sbFetch('scores?select=username,avatar,score&order=score.desc&limit=100');
+  if (!data) return [];
+  // Deduplicate: ambil skor tertinggi per username
+  const best = {};
+  for (const row of data) {
+    if (!best[row.username] || row.score > best[row.username].score) {
+      best[row.username] = row;
+    }
+  }
+  return Object.values(best).sort((a, b) => b.score - a.score).slice(0, 20);
+}
+
+// ===== QUESTIONS (60+) =====
+const questions = [
+  // EASY
+  { q: "Siapa pencipta anime/manga 'Naruto'?", options: ["Masashi Kishimoto","Eiichiro Oda","Akira Toriyama","Tite Kubo"], ans: 0, cat: "Trivia", diff: "Easy" },
+  { q: "Di One Piece, buah iblis apa yang dimakan Monkey D. Luffy?", options: ["Mera Mera no Mi","Gomu Gomu no Mi","Gura Gura no Mi","Yami Yami no Mi"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Anime mana yang menampilkan karakter 'Levi Ackerman'?", options: ["Fullmetal Alchemist","Demon Slayer","Attack on Titan","Jujutsu Kaisen"], ans: 2, cat: "Action", diff: "Easy" },
+  { q: "Studio mana yang memproduksi 'Spirited Away'?", options: ["Toei Animation","Madhouse","Studio Ghibli","Kyoto Animation"], ans: 2, cat: "Studio", diff: "Easy" },
+  { q: "Dalam Naruto, teknik terkenal Naruto yang paling ikonik adalah?", options: ["Rasengan","Chidori","Shadow Clone Jutsu","Amaterasu"], ans: 0, cat: "Naruto", diff: "Easy" },
+  { q: "Anime 'Dragon Ball' dibuat oleh siapa?", options: ["Yoshihiro Togashi","Akira Toriyama","Naoki Urasawa","Rumiko Takahashi"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Siapa musuh utama di arc Marineford dalam One Piece?", options: ["Kaido","Blackbeard","Akainu","Big Mom"], ans: 2, cat: "One Piece", diff: "Easy" },
+  { q: "Pikachu adalah starter Pokemon milik siapa?", options: ["Gary Oak","Ash Ketchum","Brock","Misty"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Karakter mana yang menggunakan 'Death Note'?", options: ["Light Yagami","L Lawliet","Near","Mello"], ans: 0, cat: "Death Note", diff: "Easy" },
+  { q: "Di Sword Art Online, nama game pertama yang dimainkan Kirito adalah?", options: ["Alfheim Online","Gun Gale Online","Sword Art Online","Underworld"], ans: 2, cat: "SAO", diff: "Easy" },
+  { q: "Anime 'My Hero Academia' bersetting di dunia dimana kebanyakan orang memiliki kemampuan yang disebut?", options: ["Quirks","Powers","Abilities","Sharingan"], ans: 0, cat: "MHA", diff: "Easy" },
+  { q: "Dalam Bleach, Ichigo Kurosaki adalah seorang?", options: ["Shinigami","Hollow","Quincy","Substitute Shinigami"], ans: 3, cat: "Bleach", diff: "Easy" },
+  { q: "Siapa captain kapal Thousand Sunny di One Piece?", options: ["Zoro","Luffy","Nami","Usopp"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di Fairy Tail, nama guild utama adalah?", options: ["Blue Pegasus","Sabertooth","Fairy Tail","Lamia Scale"], ans: 2, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Anime 'Your Name' (Kimi no Na wa) disutradarai oleh?", options: ["Hayao Miyazaki","Makoto Shinkai","Satoshi Kon","Mamoru Hosoda"], ans: 1, cat: "Film", diff: "Easy" },
+
+  // MEDIUM
+  { q: "Karakter mana yang memiliki kekuatan 'Nen' di Hunter x Hunter?", options: ["Ichigo Kurosaki","Gon Freecss","Naruto Uzumaki","Edward Elric"], ans: 1, cat: "HxH", diff: "Medium" },
+  { q: "Di Demon Slayer, breathing style apa yang digunakan Tanjiro Kamado?", options: ["Thunder Breathing","Flame Breathing","Water Breathing","Wind Breathing"], ans: 2, cat: "Kimetsu", diff: "Medium" },
+  { q: "Manga 'Berserk' dibuat oleh siapa?", options: ["Kentaro Miura","Hajime Isayama","Yoshihiro Togashi","Naoki Urasawa"], ans: 0, cat: "Manga", diff: "Medium" },
+  { q: "Dalam FMA Brotherhood, apa yang Edward dan Alphonse Elric cari?", options: ["Holy Grail","Philosopher's Stone","Dragon Ball","Death Note"], ans: 1, cat: "FMA", diff: "Medium" },
+  { q: "Anime 'Neon Genesis Evangelion' dibuat oleh studio apa?", options: ["Gainax","Madhouse","Bones","MAPPA"], ans: 0, cat: "Classic", diff: "Medium" },
+  { q: "Di JoJo's Bizarre Adventure, Stand milik Jotaro Kujo adalah?", options: ["The World","Star Platinum","Crazy Diamond","Gold Experience"], ans: 1, cat: "JoJo", diff: "Medium" },
+  { q: "Di anime Re:Zero, nama witch of Envy yang menghantui Subaru adalah?", options: ["Echidna","Satella","Carmilla","Typhon"], ans: 1, cat: "Isekai", diff: "Medium" },
+  { q: "Dalam Tokyo Ghoul, Ken Kaneki adalah?", options: ["Full Ghoul","One-Eyed Ghoul","Human","Half-Human Half-Ghoul"], ans: 3, cat: "Dark", diff: "Medium" },
+  { q: "Di Sword Art Online, siapa yang menciptakan game SAO?", options: ["Kayaba Akihiko","Sugou Nobuyuki","Asuna Yuuki","Yui"], ans: 0, cat: "SAO", diff: "Medium" },
+  { q: "Dalam Attack on Titan, Titan terbesar yang dikenal adalah?", options: ["Armored Titan","Colossal Titan","Founding Titan","Beast Titan"], ans: 1, cat: "AoT", diff: "Medium" },
+  { q: "Di Naruto, sharingan adalah kemampuan milik klan apa?", options: ["Hyuga","Uchiha","Senju","Uzumaki"], ans: 1, cat: "Naruto", diff: "Medium" },
+  { q: "Dalam Hunter x Hunter, Nen type milik Gon adalah?", options: ["Transmutation","Emission","Enhancement","Manipulation"], ans: 2, cat: "HxH", diff: "Medium" },
+  { q: "Anime 'Steins;Gate' bercerita tentang?", options: ["Mechs dan perang","Time travel","Magic school","Shonen battle"], ans: 1, cat: "Sci-Fi", diff: "Medium" },
+  { q: "Di My Hero Academia, All Might mewariskan One For All kepada?", options: ["Todoroki","Bakugo","Izuku Midoriya","Iida"], ans: 2, cat: "MHA", diff: "Medium" },
+  { q: "Karakter 'L' di Death Note memiliki nama asli?", options: ["L Lawliet","L Williams","L Moriarty","Tidak pernah disebutkan"], ans: 0, cat: "Death Note", diff: "Medium" },
+  { q: "Di One Piece, teknik Haki yang paling langka adalah?", options: ["Armament Haki","Observation Haki","Conqueror's Haki","Barrier Haki"], ans: 2, cat: "One Piece", diff: "Medium" },
+  { q: "Anime pertama yang menang Oscar untuk film animasi terbaik?", options: ["Princess Mononoke","My Neighbor Totoro","Spirited Away","Howl's Moving Castle"], ans: 2, cat: "Trivia", diff: "Medium" },
+  { q: "Di Demon Slayer, Sound Hashira adalah?", options: ["Rengoku","Tengen Uzui","Giyu Tomioka","Shinobu Kocho"], ans: 1, cat: "Kimetsu", diff: "Medium" },
+  { q: "Dalam Black Clover, Asta tidak memiliki?", options: ["Mana","Magic","Sword","Friends"], ans: 1, cat: "Magic", diff: "Medium" },
+  { q: "Di Fullmetal Alchemist, prinsip dasar alkimia yang tidak bisa dilanggar adalah?", options: ["Truth","Equivalent Exchange","The Gate","Philosopher's Law"], ans: 1, cat: "FMA", diff: "Medium" },
+
+  // HARD
+  { q: "Berapa jumlah Titan Shifter yang ada dalam Attack on Titan?", options: ["7","9","10","12"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Di One Piece, teknik 'Gear Fourth' dari Luffy bernama?", options: ["Boundman","Snakeman","Tankman","Gearman"], ans: 0, cat: "One Piece", diff: "Hard" },
+  { q: "Siapa yang menulis light novel 'Sword Art Online'?", options: ["Reki Kawahara","Kazuma Kamachi","Kugane Maruyama","Tappei Nagatsuki"], ans: 0, cat: "LN", diff: "Hard" },
+  { q: "Di Code Geass, kekuatan Geass milik Lelouch memiliki kemampuan?", options: ["Melihat masa depan","Membaca pikiran","Perintah mutlak","Menghentikan waktu"], ans: 2, cat: "Code Geass", diff: "Hard" },
+  { q: "Manga 'Vagabond' adalah adaptasi dari novel?", options: ["Musashi","Taiko","Itto","Shogun"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di Jujutsu Kaisen, Cursed Technique milik Gojo Satoru adalah?", options: ["Infinity","Limitless","Six Eyes","Ten Shadows"], ans: 1, cat: "JJK", diff: "Hard" },
+  { q: "Di Hunter x Hunter, nama teknik tertinggi Nen disebut?", options: ["Nen Burst","Zetsu","Gon and Killua's Godspeed","Vow and Limitation"], ans: 3, cat: "HxH", diff: "Hard" },
+  { q: "Dalam Evangelion, singkatan NERV berasal dari kata Jerman yang berarti?", options: ["Saraf","Kekuatan","Harapan","Perang"], ans: 0, cat: "Classic", diff: "Hard" },
+  { q: "Di Re:Zero, kemampuan Subaru Natsuki disebut?", options: ["Time Leap","Return by Death","Reset","Death Loop"], ans: 1, cat: "Isekai", diff: "Hard" },
+  { q: "Dalam Berserk, pedang milik Guts bernama?", options: ["Dragonslayer","Godhand","Beherit","Berserker Armor"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di JoJo Part 4, nama Stand milik Yoshikage Kira adalah?", options: ["Crazy Diamond","Killer Queen","Gold Experience","Sticky Fingers"], ans: 1, cat: "JoJo", diff: "Hard" },
+  { q: "Siapa author manga 'Vinland Saga'?", options: ["Makoto Yukimura","Naoki Urasawa","Hiroaki Samura","Kentaro Miura"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di Attack on Titan, Founding Titan dimiliki oleh keturunan klan apa?", options: ["Ackerman","Reiss","Tybur","Marley"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Dalam Jujutsu Kaisen, Ryomen Sukuna memiliki berapa jari?", options: ["10","15","20","22"], ans: 2, cat: "JJK", diff: "Hard" },
+  { q: "Di Steins;Gate, nama organisasi yang mengejar Okabe adalah?", options: ["SERN","CERN","DARPA","Rounders"], ans: 0, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Dalam Overlord, nama guild Ainz di game YGGDRASIL adalah?", options: ["Nazarick","Ainz Ooal Gown","Six Great Gods","Slane Theocracy"], ans: 1, cat: "Isekai", diff: "Hard" },
+];
+
+// ===== STATE =====
+let users = JSON.parse(localStorage.getItem('oq_users') || '[]');
+let currentUser = JSON.parse(localStorage.getItem('oq_current') || 'null');
+let selectedAvatar = '🦊';
+let pendingPlay = false;
+
+// Timer state — gunakan timestamp agar tidak terpengaruh device speed
+let timerState = {
+  endTime: 0,
+  rafId: null,
+  duration: 15,
+  active: false,
+};
+
+let gameState = {
+  questions: [],
+  current: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  startTime: 0,
+  totalTime: 0,
+  shuffledOpts: [],
+  answered: false,
+};
+
+// ===== INIT =====
+window.onload = () => {
+  createParticles();
+  updateTopbar();
+};
+
+function createParticles() {
+  const emojis = ['⚔️','🌸','⭐','🔥','💫','🎌','🌙','⚡'];
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(p);
+  }
+}
+
+function updateTopbar() {
+  const right = document.getElementById('topbarRight');
+  if (currentUser) {
+    right.innerHTML = `
+      <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+      <div class="profile-chip">
+        <span class="av">${currentUser.avatar || '👤'}</span>
+        <span class="uname">${currentUser.username}</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">Logout</button>
+    `;
+  } else {
+    right.innerHTML = `
+      <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+      <button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>
+    `;
+  }
+}
+
+// ===== E-CATALOGUE =====
+function openCatalogue() {
+  document.getElementById('catModal').classList.add('show');
+}
+function closeCatalogue() {
+  document.getElementById('catModal').classList.remove('show');
+}
+
+// ===== NAVIGATION =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  stopTimer();
+  showPage('page-home');
+}
+
+// ===== AUTH MODAL =====
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('show');
+}
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('show');
+  // reset form
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('reg-username').value = '';
+  document.getElementById('reg-password').value = '';
+}
+
+function switchTab(tab) {
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+}
+
+function selectAvatar(el) {
+  document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAvatar = el.dataset.avatar;
+}
+
+// Klik tombol MULAI MAIN
+function handlePlayBtn() {
+  if (currentUser) {
+    startQuiz();
+  } else {
+    pendingPlay = true;
+    openAuthModal();
+  }
+}
+
+async function handleLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password) { showToast('Isi username & password dulu!', 'error'); return; }
+
+  showToast('Logging in...', 'info');
+
+  let user = users.find(u => u.username === username && u.password === password);
+  if (!user) {
+    const sbUser = await loginFromSupabase(username, password);
+    if (sbUser) {
+      user = { username: sbUser.username, password, avatar: sbUser.avatar, highScore: 0, gamesPlayed: 0 };
+      users.push(user);
+      localStorage.setItem('oq_users', JSON.stringify(users));
+    }
+  }
+
+  if (!user) { showToast('Username atau password salah!', 'error'); return; }
+
+  currentUser = user;
+  localStorage.setItem('oq_current', JSON.stringify(user));
+  updateTopbar();
+  closeAuthModal();
+  showToast(`Welcome back, ${user.username}! ${user.avatar}`, 'success');
+
+  if (pendingPlay) {
+    pendingPlay = false;
+    setTimeout(() => startQuiz(), 600);
+  }
+}
+
+async function handleRegister() {
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!username || !password) { showToast('Isi semua field dulu!', 'error'); return; }
+  if (username.length < 3) { showToast('Username minimal 3 karakter!', 'error'); return; }
+  if (users.find(u => u.username === username)) { showToast('Username sudah dipakai!', 'error'); return; }
+
+  showToast('Mendaftar...', 'info');
+
+  const result = await registerToSupabase(username, password, selectedAvatar);
+  if (result && result.code === '23505') { showToast('Username sudah dipakai!', 'error'); return; }
+
+  const newUser = { username, password, avatar: selectedAvatar, highScore: 0, gamesPlayed: 0 };
+  users.push(newUser);
+  localStorage.setItem('oq_users', JSON.stringify(users));
+  currentUser = newUser;
+  localStorage.setItem('oq_current', JSON.stringify(newUser));
+  updateTopbar();
+  closeAuthModal();
+  showToast(`Selamat datang, ${username}! ${selectedAvatar}`, 'success');
+
+  if (pendingPlay) {
+    pendingPlay = false;
+    setTimeout(() => startQuiz(), 600);
+  }
+}
+
+function guestPlay() {
+  currentUser = { username: 'Tamu', avatar: '👤', highScore: 0, gamesPlayed: 0, isGuest: true };
+  updateTopbar();
+  closeAuthModal();
+  pendingPlay = false;
+  showToast('Main sebagai tamu — skor tidak akan disimpan!', 'info');
+  setTimeout(() => startQuiz(), 600);
+}
+
+function handleLogout() {
+  currentUser = null;
+  localStorage.removeItem('oq_current');
+  updateTopbar();
+  goHome();
+  showToast('Berhasil logout!', 'info');
+}
+
+// ===== LEADERBOARD MODAL =====
+function openLeaderboard() {
+  document.getElementById('lbModal').classList.add('show');
+  renderLeaderboard();
+}
+function closeLeaderboard() {
+  document.getElementById('lbModal').classList.remove('show');
+}
+
+async function renderLeaderboard() {
+  const podiumEl = document.getElementById('lbPodium');
+  const listEl = document.getElementById('lbList');
+  listEl.innerHTML = '<div class="lb-loading">Loading... ⏳</div>';
+  podiumEl.innerHTML = '';
+
+  let allScores = await getLeaderboard();
+  if (!allScores || allScores.length === 0) {
+    // Fallback ke data lokal
+    const localBest = {};
+    for (const u of users) {
+      if (u.highScore > 0) localBest[u.username] = { username: u.username, avatar: u.avatar || '👤', score: u.highScore };
+    }
+    allScores = Object.values(localBest).sort((a, b) => b.score - a.score);
+  }
+
+  const top3 = allScores.slice(0, 3);
+  const order = [top3[1], top3[0], top3[2]];
+  const classes = ['p2', 'p1', 'p3'];
+  const crowns = ['🥈', '👑', '🥉'];
+  podiumEl.innerHTML = order.map((u, i) => u ? `
+    <div class="podium-place ${classes[i]}">
+      <span class="crown">${crowns[i]}</span>
+      <span class="podium-avatar">${u.avatar || '👤'}</span>
+      <span class="podium-name">${u.username}</span>
+      <span class="podium-score">${u.score}</span>
+    </div>
+  ` : `<div class="podium-place ${classes[i]}"><span style="color:var(--muted);font-size:0.7rem;font-weight:700;">???</span></div>`).join('');
+
+  if (allScores.length === 0) {
+    listEl.innerHTML = '<div class="lb-loading">Belum ada pemain. Jadilah yang pertama! 🚀</div>';
+    return;
+  }
+  listEl.innerHTML = allScores.map((u, i) => `
+    <div class="lb-item ${currentUser && u.username === currentUser.username ? 'is-me' : ''}">
+      <span class="lb-rank">${i + 1}</span>
+      <span class="lb-avatar">${u.avatar || '👤'}</span>
+      <div class="lb-info">
+        <div class="lb-name">${u.username}</div>
+        <div class="lb-meta">Best score</div>
+      </div>
+      <span class="lb-score-val">${u.score}</span>
+    </div>
+  `).join('');
+}
+
+// ===== TIMER (timestamp-based, tidak bergantung device speed) =====
+function stopTimer() {
+  timerState.active = false;
+  if (timerState.rafId) {
+    cancelAnimationFrame(timerState.rafId);
+    timerState.rafId = null;
+  }
+}
+
+function startTimer(duration, onTick, onExpire) {
+  stopTimer();
+  timerState.duration = duration;
+  timerState.endTime = performance.now() + duration * 1000;
+  timerState.active = true;
+
+  const circumference = 163.4;
+  const arc = document.getElementById('timerArc');
+  const text = document.getElementById('timerText');
+
+  function tick(now) {
+    if (!timerState.active) return;
+    const remaining = Math.max(0, (timerState.endTime - now) / 1000);
+    const pct = remaining / duration;
+    const offset = circumference * (1 - pct);
+
+    const color = remaining > 7 ? 'var(--cyan)' : remaining > 3 ? 'var(--yellow)' : 'var(--pink)';
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = color;
+    text.textContent = Math.ceil(remaining);
+    text.style.color = color;
+
+    if (onTick) onTick(remaining);
+
+    if (remaining <= 0) {
+      timerState.active = false;
+      if (onExpire) onExpire();
+      return;
+    }
+    timerState.rafId = requestAnimationFrame(tick);
+  }
+
+  timerState.rafId = requestAnimationFrame(tick);
+}
+
+// ===== QUIZ =====
+function startQuiz() {
+  const shuffled = [...questions].sort(() => Math.random() - 0.5).slice(0, 10);
+  gameState = {
+    questions: shuffled,
+    current: 0,
+    score: 0,
+    correct: 0,
+    wrong: 0,
+    startTime: Date.now(),
+    totalTime: 0,
+    shuffledOpts: [],
+    answered: false,
+  };
+  showPage('page-quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = gameState.questions[gameState.current];
+  const total = gameState.questions.length;
+  const progress = (gameState.current / total) * 100;
+
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('currentScore').textContent = gameState.score;
+  document.getElementById('questionCategory').textContent = q.cat;
+  document.getElementById('questionDiff').textContent = q.diff;
+  document.getElementById('questionText').textContent = `Q${gameState.current + 1}/${total}: ${q.q}`;
+
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  const shuffledOpts = q.options.map((opt, i) => ({ text: opt, origIdx: i })).sort(() => Math.random() - 0.5);
+  gameState.shuffledOpts = shuffledOpts;
+  gameState.answered = false;
+
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="answer-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    grid.appendChild(btn);
+  });
+
+  // Start timer using timestamp-based approach
+  startTimer(15, null, () => {
+    if (!gameState.answered) timeUp();
+  });
+}
+
+function selectAnswer(selectedIdx, btn) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  stopTimer();
+
+  const q = gameState.questions[gameState.current];
+  const isCorrect = gameState.shuffledOpts[selectedIdx].origIdx === q.ans;
+
+  document.querySelectorAll('.answer-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (gameState.shuffledOpts[i].origIdx === q.ans) b.classList.add('correct');
+  });
+  if (!isCorrect) btn.classList.add('wrong');
+
+  if (isCorrect) {
+    const arc = document.getElementById('timerArc');
+    const currentOffset = parseFloat(arc.style.strokeDashoffset) || 0;
+    const remaining = ((163.4 - currentOffset) / 163.4) * 15;
+    const timeBonus = Math.ceil(Math.max(0, remaining) * 10);
+    const points = 100 + timeBonus;
+    gameState.score += points;
+    gameState.correct++;
+    document.getElementById('currentScore').textContent = gameState.score;
+    showToast(`+${points} poin! ✓`, 'success');
+  } else {
+    gameState.wrong++;
+    showToast('Salah! 💀', 'error');
+  }
+
+  setTimeout(nextQuestion, 1500);
+}
+
+function timeUp() {
+  if (gameState.answered) return;
+  gameState.answered = true;
+
+  const q = gameState.questions[gameState.current];
+  document.querySelectorAll('.answer-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (gameState.shuffledOpts[i].origIdx === q.ans) b.classList.add('correct');
+  });
+  gameState.wrong++;
+  showToast('Waktu habis! ⏱️', 'error');
+  setTimeout(nextQuestion, 1500);
+}
+
+function nextQuestion() {
+  gameState.current++;
+  if (gameState.current >= gameState.questions.length) {
+    endGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+async function endGame() {
+  stopTimer();
+  gameState.totalTime = Math.round((Date.now() - gameState.startTime) / 1000);
+
+  if (currentUser && !currentUser.isGuest) {
+    const userIdx = users.findIndex(u => u.username === currentUser.username);
+    if (userIdx !== -1) {
+      users[userIdx].gamesPlayed = (users[userIdx].gamesPlayed || 0) + 1;
+      if (gameState.score > (users[userIdx].highScore || 0)) {
+        users[userIdx].highScore = gameState.score;
+      }
+      localStorage.setItem('oq_users', JSON.stringify(users));
+      currentUser = users[userIdx];
+      localStorage.setItem('oq_current', JSON.stringify(currentUser));
+    }
+    await saveScore(currentUser.username, currentUser.avatar || '🦊', gameState.score, gameState.correct);
+  }
+
+  const pct = gameState.correct / gameState.questions.length;
+  let emoji, title;
+  if (pct >= 0.9) { emoji = '🏆'; title = 'OTAKU SEJATI!'; }
+  else if (pct >= 0.7) { emoji = '🎉'; title = 'Keren Banget!'; }
+  else if (pct >= 0.5) { emoji = '👍'; title = 'Lumayan Nih!'; }
+  else { emoji = '📚'; title = 'Belajar Lagi Yuk~'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultScore').textContent = gameState.score;
+  document.getElementById('correctCount').textContent = gameState.correct;
+  document.getElementById('wrongCount').textContent = gameState.wrong;
+  document.getElementById('timeUsed').textContent = gameState.totalTime + 's';
+
+  showPage('page-result');
+  if (pct >= 0.7) launchConfetti();
+}
+
+// ===== UTILS =====
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function launchConfetti() {
+  const colors = ['#FF3D8B','#FFD726','#00E5FF','#9B5DE5','#FF6B35','#00FF88'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    if (Math.random() > 0.5) c.style.borderRadius = '50%';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// Close modal when clicking overlay
+document.getElementById('authModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAuthModal();
+});
+document.getElementById('lbModal').addEventListener('click', function(e) {
+  if (e.target === this) closeLeaderboard();
+});
+document.getElementById('catModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCatalogue();
+});
+</script>
+</body>
+</html>
