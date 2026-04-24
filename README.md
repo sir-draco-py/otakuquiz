@@ -1,1 +1,1 @@
-A trivial quiz game that will challege your knowledge on Anime and Manga.
+A trivial quiz game that will challenge your knowledge on Anime and Manga.
