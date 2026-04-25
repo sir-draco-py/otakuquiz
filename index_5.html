@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OtakuQuiz — Uji Pengetahuan Anime & Manga Kamu!</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='36' y2='36' gradientUnits='userSpaceOnUse'><stop offset='0%25' stop-color='%23FF3D8B'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><path d='M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z' fill='url(%23g)' opacity='.2'/><path d='M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z' stroke='url(%23g)' stroke-width='1.5' fill='none'/><text x='18' y='24' font-family='Arial' font-weight='bold' font-size='16' fill='url(%23g)' text-anchor='middle'>Q</text><circle cx='10' cy='10' r='1.5' fill='%23FFD726' opacity='.9'/><circle cx='26' cy='10' r='1.5' fill='%23FFD726' opacity='.9'/><circle cx='18' cy='5' r='1' fill='%23FF3D8B' opacity='.9'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF3D8B;
+    --yellow: #FFD726;
+    --cyan: #00E5FF;
+    --purple: #9B5DE5;
+    --orange: #FF6B35;
+    --bg: #0D0D1A;
+    --card: #16162A;
+    --card2: #1E1E38;
+    --text: #F0F0FF;
+    --muted: #8888AA;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(255,61,139,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(155,93,229,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 30%, rgba(0,229,255,0.08) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== PAGES ===== */
+  .page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .page.active { display: flex; flex-direction: column; }
+
+  /* ===== PARTICLES ===== */
+  .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute; font-size: 1.5rem; opacity: 0.12;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.12; }
+    90% { opacity: 0.12; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 56px;
+    background: rgba(13,13,26,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem;
+    z-index: 50;
+  }
+  .topbar-logo {
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    cursor: pointer;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+  .profile-chip {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem; font-weight: 700;
+  }
+  .profile-chip:hover { border-color: var(--pink); }
+  .profile-chip .av { font-size: 1.2rem; }
+  .profile-chip .uname { color: var(--text); }
+  .btn-logout {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    padding: 0.3rem 0.8rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-logout:hover { border-color: #FF4444; color: #FF4444; }
+  .btn-topbar-login {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; border: none;
+    font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px;
+    padding: 0.35rem 1.2rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-topbar-login:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,61,139,0.4); }
+
+  /* ===== BUTTONS ===== */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), var(--orange));
+    color: white; border: none;
+    font-family: 'Bangers', cursive; font-size: 1.4rem; letter-spacing: 2px;
+    padding: 1rem 3rem; border-radius: 50px; cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 30px rgba(255,61,139,0.4);
+    position: relative; overflow: hidden;
+  }
+  .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 40px rgba(255,61,139,0.6); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary {
+    background: transparent; color: var(--cyan);
+    border: 2px solid var(--cyan);
+    font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 2px;
+    padding: 0.8rem 2rem; border-radius: 50px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(0,229,255,0.1); transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent; border: 2px solid rgba(255,255,255,0.2); color: var(--text);
+    font-family: 'Bangers', cursive; font-size: 1.1rem; letter-spacing: 2px;
+    padding: 0.8rem 2rem; border-radius: 50px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+  /* ===== PAGE: HOME ===== */
+  #page-home {
+    align-items: center; justify-content: center;
+    text-align: center; padding: 5rem 2rem 2rem;
+  }
+  .logo-badge {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; font-family: 'Bangers', cursive;
+    font-size: 0.9rem; letter-spacing: 3px;
+    padding: 6px 18px; border-radius: 50px; margin-bottom: 1.5rem;
+    display: inline-block; animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  .hero-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(4rem, 12vw, 8rem);
+    line-height: 0.9; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--yellow) 40%, var(--cyan) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: titlePop 0.8s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes titlePop { 0%{transform:scale(0.5) rotate(-5deg);opacity:0} 100%{transform:scale(1) rotate(0deg);opacity:1} }
+  .hero-sub { font-size: 1.1rem; color: var(--muted); margin-bottom: 3rem; font-weight: 600; animation: fadeInUp 0.8s 0.3s ease both; }
+  @keyframes fadeInUp { 0%{transform:translateY(20px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+  .stats-row { display: flex; gap: 2rem; justify-content: center; margin-bottom: 3rem; animation: fadeInUp 0.8s 0.5s ease both; flex-wrap: wrap; }
+  .stat-item { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 1.5rem; text-align: center; }
+  .stat-num { font-family: 'Bangers', cursive; font-size: 2rem; color: var(--yellow); letter-spacing: 1px; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .home-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; animation: fadeInUp 0.8s 0.7s ease both; }
+  .category-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-top: 3rem; max-width: 500px; animation: fadeInUp 0.8s 0.9s ease both; }
+  .cat-chip { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.6rem; font-size: 0.8rem; font-weight: 800; color: var(--muted); text-align: center; transition: all 0.2s; }
+  .cat-chip:hover { border-color: var(--pink); color: var(--pink); transform: scale(1.05); }
+  .cat-chip .emoji { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+
+  /* ===== PAGE: QUIZ ===== */
+  #page-quiz { padding: 5rem 1.5rem 2rem; align-items: stretch; }
+  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+  .quiz-progress-bar { flex: 1; height: 8px; background: var(--card2); border-radius: 4px; margin: 0 1rem; overflow: hidden; }
+  .quiz-progress-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--yellow)); border-radius: 4px; transition: width 0.5s ease; }
+  .score-badge { background: var(--card); border: 1px solid rgba(255,215,38,0.3); border-radius: 50px; padding: 0.4rem 1rem; font-family: 'Bangers', cursive; font-size: 1.1rem; color: var(--yellow); letter-spacing: 1px; white-space: nowrap; }
+  .timer-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
+  .timer-svg { position: absolute; top: 0; left: 0; width: 60px; height: 60px; transform: rotate(-90deg); }
+  .timer-track { fill: none; stroke: var(--card2); stroke-width: 4; }
+  .timer-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+  .timer-inner { font-family: 'Bangers', cursive; font-size: 1.3rem; position: relative; z-index: 1; }
+  .question-card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 2rem; max-width: 700px; margin: 0 auto 1.5rem; position: relative; overflow: hidden; animation: cardSlideIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes cardSlideIn { 0%{transform:translateX(60px);opacity:0} 100%{transform:translateX(0);opacity:1} }
+  .question-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--purple),var(--pink),var(--cyan)); }
+  .question-meta { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .q-tag { border-radius: 50px; padding: 3px 12px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+  .q-tag-cat { background: rgba(155,93,229,0.2); color: var(--purple); border: 1px solid rgba(155,93,229,0.3); }
+  .q-tag-diff { background: rgba(255,215,38,0.2); color: var(--yellow); border: 1px solid rgba(255,215,38,0.3); }
+  .question-text { font-size: 1.2rem; font-weight: 800; line-height: 1.5; }
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; max-width: 700px; margin: 0 auto; }
+  .answer-btn { background: var(--card); border: 2px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 1.2rem; color: var(--text); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; text-align: left; display: flex; align-items: center; gap: 0.8rem; animation: fadeInUp 0.4s ease both; }
+  .answer-btn:nth-child(1){animation-delay:0.05s} .answer-btn:nth-child(2){animation-delay:0.1s} .answer-btn:nth-child(3){animation-delay:0.15s} .answer-btn:nth-child(4){animation-delay:0.2s}
+  .answer-btn:hover:not(:disabled) { border-color: var(--pink); background: rgba(255,61,139,0.1); transform: translateY(-2px); }
+  .answer-btn:disabled { cursor: not-allowed; }
+  .answer-btn.correct { border-color: #00FF88; background: rgba(0,255,136,0.15); color: #00FF88; }
+  .answer-btn.wrong { border-color: #FF4444; background: rgba(255,68,68,0.15); color: #FF4444; }
+  .answer-letter { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-family: 'Bangers', cursive; font-size: 1rem; flex-shrink: 0; }
+  .answer-btn.correct .answer-letter { background: rgba(0,255,136,0.2); color: #00FF88; }
+  .answer-btn.wrong .answer-letter { background: rgba(255,68,68,0.2); color: #FF4444; }
+
+  /* ===== PAGE: RESULT ===== */
+  #page-result { align-items: center; justify-content: center; padding: 5rem 2rem 2rem; text-align: center; }
+  .result-emoji { font-size: 5rem; margin-bottom: 1rem; animation: bounceIn 0.8s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes bounceIn { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.2);opacity:1} 100%{transform:scale(1)} }
+  .result-title { font-family: 'Bangers', cursive; font-size: 3.5rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--yellow),var(--orange)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; margin-bottom: 0.5rem; }
+  .result-score-big { font-family: 'Bangers', cursive; font-size: 6rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--pink),var(--cyan)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; line-height: 1; margin-bottom: 0.5rem; animation: scoreCount 1s ease both 0.3s; }
+  @keyframes scoreCount { 0%{transform:scale(0.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+  .result-label { color: var(--muted); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem; }
+  .result-stats { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap; }
+  .result-stat { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 1.5rem; min-width: 90px; }
+  .result-stat-num { font-family: 'Bangers', cursive; font-size: 2rem; letter-spacing: 1px; }
+  .result-stat-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .correct-stat .result-stat-num { color: #00FF88; }
+  .wrong-stat .result-stat-num { color: #FF4444; }
+  .time-stat .result-stat-num { color: var(--cyan); }
+  .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+  /* ===== MODAL (Login & Leaderboard) ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    width: 100%; max-width: 440px;
+    position: relative;
+    transform: translateY(30px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.show .modal-box { transform: translateY(0) scale(1); }
+  .modal-box::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--pink),var(--purple),var(--cyan)); }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.08); border: none; color: var(--muted); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .modal-close:hover { background: rgba(255,68,68,0.2); color: #FF4444; }
+
+  /* Auth modal content */
+  .auth-title { font-family: 'Bangers', cursive; font-size: 2.5rem; letter-spacing: 2px; margin-bottom: 0.3rem; background: linear-gradient(135deg,var(--pink),var(--cyan)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+  .auth-subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; font-weight: 600; }
+  .tab-row { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 1.5rem; }
+  .tab-btn { flex: 1; padding: 0.6rem; border: none; background: transparent; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .tab-btn.active { background: linear-gradient(135deg,var(--pink),var(--purple)); color: white; }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-label { display: block; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; }
+  .form-input { width: 100%; background: var(--bg); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.8rem 1rem; color: var(--text); font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600; transition: border-color 0.2s; outline: none; }
+  .form-input:focus { border-color: var(--pink); }
+  .form-input::placeholder { color: var(--muted); }
+  .avatar-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .avatar-opt { width: 44px; height: 44px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: all 0.2s; }
+  .avatar-opt:hover, .avatar-opt.selected { border-color: var(--pink); transform: scale(1.1); }
+
+  /* Leaderboard modal */
+  .lb-modal-box { max-width: 560px; }
+  .lb-title { font-family: 'Bangers', cursive; font-size: 2.5rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--yellow),var(--orange)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; text-align: center; }
+  .lb-subtitle { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-align: center; margin-bottom: 1.5rem; }
+  .lb-podium { display: flex; align-items: flex-end; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; height: 140px; }
+  .podium-place { flex: 1; max-width: 130px; border-radius: 12px 12px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 0.6rem; }
+  .podium-place.p1 { height: 100%; background: linear-gradient(180deg,rgba(255,215,38,0.3),rgba(255,215,38,0.1)); border: 1px solid rgba(255,215,38,0.4); }
+  .podium-place.p2 { height: 75%; background: linear-gradient(180deg,rgba(192,192,192,0.2),rgba(192,192,192,0.05)); border: 1px solid rgba(192,192,192,0.3); }
+  .podium-place.p3 { height: 60%; background: linear-gradient(180deg,rgba(205,127,50,0.2),rgba(205,127,50,0.05)); border: 1px solid rgba(205,127,50,0.3); }
+  .podium-avatar { font-size: 1.6rem; }
+  .podium-name { font-size: 0.7rem; font-weight: 800; text-align: center; padding: 0 4px; }
+  .podium-score { font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px; }
+  .podium-place.p1 .podium-score { color: var(--yellow); }
+  .podium-place.p2 .podium-score { color: #C0C0C0; }
+  .podium-place.p3 .podium-score { color: #CD7F32; }
+  .crown { font-size: 1rem; }
+  .lb-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto; }
+  .lb-item { background: var(--card2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 0.8rem 1rem; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; }
+  .lb-item:hover { border-color: rgba(255,255,255,0.15); }
+  .lb-rank { font-family: 'Bangers', cursive; font-size: 1.2rem; color: var(--muted); width: 24px; text-align: center; }
+  .lb-avatar { font-size: 1.5rem; }
+  .lb-info { flex: 1; }
+  .lb-name { font-weight: 800; font-size: 0.9rem; }
+  .lb-meta { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+  .lb-score-val { font-family: 'Bangers', cursive; font-size: 1.4rem; color: var(--yellow); letter-spacing: 1px; }
+  .lb-item.is-me { border-color: rgba(255,61,139,0.4); background: rgba(255,61,139,0.08); }
+  .lb-item.is-me .lb-name::after { content: ' (Kamu)'; color: var(--pink); font-size: 0.75rem; }
+  .lb-loading { text-align: center; color: var(--muted); padding: 2rem; font-weight: 700; }
+
+  /* ===== DIFFICULTY MODAL ===== */
+  .diff-modal-box { max-width: 480px; text-align: center; }
+  .diff-modal-title { font-family: 'Bangers', cursive; font-size: 2.2rem; letter-spacing: 2px; background: linear-gradient(135deg,var(--pink),var(--cyan)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; margin-bottom: 0.3rem; }
+  .diff-modal-sub { color: var(--muted); font-size: 0.85rem; font-weight: 600; margin-bottom: 1.8rem; }
+  .diff-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-bottom: 0.5rem; }
+  .diff-card { background: var(--card); border: 2px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.2rem 1rem; cursor: pointer; transition: all 0.22s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+  .diff-card:hover { transform: translateY(-3px); }
+  .diff-card.random { border-color: rgba(155,93,229,0.5); }
+  .diff-card.random:hover { background: rgba(155,93,229,0.15); border-color: var(--purple); box-shadow: 0 0 18px rgba(155,93,229,0.3); }
+  .diff-card.easy { border-color: rgba(0,229,85,0.4); grid-column: 1; }
+  .diff-card.easy:hover { background: rgba(0,229,85,0.1); border-color: #00E555; box-shadow: 0 0 18px rgba(0,229,85,0.25); }
+  .diff-card.medium { border-color: rgba(255,215,38,0.4); }
+  .diff-card.medium:hover { background: rgba(255,215,38,0.1); border-color: var(--yellow); box-shadow: 0 0 18px rgba(255,215,38,0.25); }
+  .diff-card.hard { border-color: rgba(255,61,139,0.4); }
+  .diff-card.hard:hover { background: rgba(255,61,139,0.1); border-color: var(--pink); box-shadow: 0 0 18px rgba(255,61,139,0.25); }
+  .diff-card.random { grid-column: 1 / -1; }
+  .diff-card-emoji { font-size: 2rem; }
+  .diff-card-name { font-family: 'Bangers', cursive; font-size: 1.4rem; letter-spacing: 1px; }
+  .diff-card.random .diff-card-name { color: var(--purple); }
+  .diff-card.easy .diff-card-name { color: #00E555; }
+  .diff-card.medium .diff-card-name { color: var(--yellow); }
+  .diff-card.hard .diff-card-name { color: var(--pink); }
+  .diff-card-desc { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+  .diff-card-soal { font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; margin-top: 0.2rem; }
+  .diff-card.random .diff-card-soal { background: rgba(155,93,229,0.15); color: var(--purple); }
+  .diff-card.easy .diff-card-soal { background: rgba(0,229,85,0.15); color: #00E555; }
+  .diff-card.medium .diff-card-soal { background: rgba(255,215,38,0.15); color: var(--yellow); }
+  .diff-card.hard .diff-card-soal { background: rgba(255,61,139,0.15); color: var(--pink); }
+
+  /* ===== LEADERBOARD TABS ===== */
+  .lb-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; background: var(--card); border-radius: 12px; padding: 4px; }
+  .lb-tab { flex: 1; padding: 0.5rem 0.3rem; border-radius: 9px; border: none; background: transparent; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+  .lb-tab.active { color: #fff; }
+  .lb-tab.t-random.active { background: rgba(155,93,229,0.35); color: var(--purple); }
+  .lb-tab.t-easy.active { background: rgba(0,229,85,0.25); color: #00E555; }
+  .lb-tab.t-medium.active { background: rgba(255,215,38,0.2); color: var(--yellow); }
+  .lb-tab.t-hard.active { background: rgba(255,61,139,0.25); color: var(--pink); }
+
+  /* ===== TOAST ===== */
+  .toast { position: fixed; top: 4.5rem; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; padding: 0.7rem 1.4rem; font-weight: 800; font-size: 0.85rem; z-index: 300; transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(0,255,136,0.4); color: #00FF88; }
+  .toast.error { border-color: rgba(255,68,68,0.4); color: #FF4444; }
+  .toast.info { border-color: rgba(0,229,255,0.4); color: var(--cyan); }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece { position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 400; animation: confettiFall 3s ease forwards; }
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+  @media (max-width: 500px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .stats-row { gap: 0.8rem; }
+    .result-stats { gap: 0.6rem; }
+  }
+
+  /* ===== LOGO SVG ===== */
+  .logo-svg-wrap {
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+  }
+  .logo-svg-wrap svg { width: 36px; height: 36px; flex-shrink: 0; }
+  .logo-svg-text {
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* ===== WATERMARK ===== */
+  .watermark {
+    position: fixed;
+    font-family: 'Bangers', cursive;
+    font-size: 0.85rem; letter-spacing: 2px;
+    color: rgba(255,255,255,0.07);
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .watermark-br {
+    bottom: 1rem; right: 1.2rem;
+    transform: rotate(-15deg);
+  }
+  .watermark-tl {
+    top: 4.5rem; left: 1.2rem;
+    transform: rotate(15deg);
+  }
+
+  /* ===== E-CATALOGUE MODAL ===== */
+  .cat-modal-box { max-width: 600px; }
+  .cat-modal-title {
+    font-family: 'Bangers', cursive; font-size: 2.2rem; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-align: center; margin-bottom: 0.3rem;
+  }
+  .cat-modal-sub { color: var(--muted); font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; max-height: 420px; overflow-y: auto; }
+  .cat-card {
+    background: var(--card2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 1rem;
+    transition: all 0.2s; cursor: default;
+  }
+  .cat-card:hover { border-color: var(--pink); transform: translateY(-2px); }
+  .cat-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+  .cat-card-emoji { font-size: 1.8rem; }
+  .cat-card-name { font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
+  .cat-card-desc { font-size: 0.78rem; color: var(--muted); font-weight: 600; line-height: 1.4; margin-bottom: 0.6rem; }
+  .cat-card-footer { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .diff-badge { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px; }
+  .diff-easy { background: rgba(0,255,136,0.15); color: #00FF88; border: 1px solid rgba(0,255,136,0.3); }
+  .diff-medium { background: rgba(255,215,38,0.15); color: var(--yellow); border: 1px solid rgba(255,215,38,0.3); }
+  .diff-hard { background: rgba(255,61,139,0.15); color: var(--pink); border: 1px solid rgba(255,61,139,0.3); }
+  .cat-count { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; background: rgba(155,93,229,0.15); color: var(--purple); border: 1px solid rgba(155,93,229,0.3); }
+  .cat-btn-topbar {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    padding: 0.3rem 0.8rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .cat-btn-topbar:hover { border-color: var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== WATERMARK ===== -->
+<div class="watermark watermark-br">© Faizal Kurniawan — OtakuQuiz</div>
+<div class="watermark watermark-tl">🎌 Faizal Kurniawan — OtakuQuiz 2026</div>
+
+<!-- ===== TOPBAR ===== -->
+<div class="topbar">
+  <div class="logo-svg-wrap" onclick="goHome()">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FF3D8B"/>
+          <stop offset="100%" stop-color="#00E5FF"/>
+        </linearGradient>
+      </defs>
+      <!-- Shield shape -->
+      <path d="M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z" fill="url(#logoGrad)" opacity="0.15"/>
+      <path d="M18 2L4 8v10c0 8 6 14 14 16 8-2 14-8 14-16V8L18 2z" stroke="url(#logoGrad)" stroke-width="1.5" fill="none"/>
+      <!-- Q letter -->
+      <text x="18" y="24" font-family="Bangers, cursive" font-size="16" fill="url(#logoGrad)" text-anchor="middle" letter-spacing="1">Q</text>
+      <!-- Star accents -->
+      <circle cx="10" cy="10" r="1.5" fill="#FFD726" opacity="0.8"/>
+      <circle cx="26" cy="10" r="1.5" fill="#FFD726" opacity="0.8"/>
+      <circle cx="18" cy="5" r="1" fill="#FF3D8B" opacity="0.9"/>
+    </svg>
+    <span class="logo-svg-text">OtakuQuiz</span>
+  </div>
+  <div class="topbar-right" id="topbarRight">
+    <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+    <button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="logo-badge">🎌 OTAKU QUIZ</div>
+  <h1 class="hero-title">OtakuQuiz</h1>
+  <p class="hero-sub">Uji pengetahuan Anime & Manga kamu! Can you reach the top? 🏆</p>
+  <div class="stats-row">
+    <div class="stat-item"><div class="stat-num">400+</div><div class="stat-label">Soal</div></div>
+    <div class="stat-item"><div class="stat-num">11</div><div class="stat-label">Kategori</div></div>
+    <div class="stat-item"><div class="stat-num">∞</div><div class="stat-label">Fun!</div></div>
+  </div>
+  <div class="home-btns">
+    <button class="btn-primary" onclick="handlePlayBtn()">MULAI MAIN! 🚀</button>
+    <button class="btn-secondary" onclick="openLeaderboard()">Leaderboard 🏆</button>
+  </div>
+  <div class="category-grid">
+    <div class="cat-chip"><span class="emoji">⚔️</span>Action</div>
+    <div class="cat-chip"><span class="emoji">🔮</span>Fantasy</div>
+    <div class="cat-chip"><span class="emoji">😂</span>Comedy</div>
+    <div class="cat-chip"><span class="emoji">📚</span>Manga</div>
+    <div class="cat-chip"><span class="emoji">🎵</span>Opening</div>
+    <div class="cat-chip"><span class="emoji">👾</span>Karakter</div>
+  </div>
+</div>
+
+<!-- ===== PAGE: QUIZ ===== -->
+<div class="page" id="page-quiz">
+  <div class="quiz-header">
+    <div class="score-badge">⭐ <span id="currentScore">0</span></div>
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="timer-circle" id="timerCircle">
+      <svg class="timer-svg" viewBox="0 0 60 60">
+        <circle class="timer-track" cx="30" cy="30" r="26"/>
+        <circle class="timer-fill" id="timerArc" cx="30" cy="30" r="26"
+          stroke-dasharray="163.4" stroke-dashoffset="0" stroke="var(--cyan)"/>
+      </svg>
+      <span class="timer-inner" id="timerText">15</span>
+    </div>
+  </div>
+  <div style="text-align:center;margin-bottom:0.5rem;">
+    <span id="activeDiffBadge" style="font-family:'Bangers',cursive;font-size:0.9rem;letter-spacing:1px;opacity:0.75;">🎲 RANDOM</span>
+  </div>
+  <div class="question-card" id="questionCard">
+    <div class="question-meta">
+      <span class="q-tag q-tag-cat" id="questionCategory">General</span>
+      <span class="q-tag q-tag-diff" id="questionDiff">Medium</span>
+    </div>
+    <p class="question-text" id="questionText">Loading...</p>
+  </div>
+  <div class="answers-grid" id="answersGrid"></div>
+</div>
+
+<!-- ===== PAGE: RESULT ===== -->
+<div class="page" id="page-result">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <div class="result-title" id="resultTitle">Keren Banget!</div>
+  <div class="result-score-big" id="resultScore">0</div>
+  <div class="result-label">POIN</div>
+  <div style="margin-bottom:0.8rem;"><span id="resultDiffLabel" style="font-family:'Bangers',cursive;font-size:1rem;letter-spacing:1px;opacity:0.7;">🎲 Random</span></div>
+  <div class="result-stats">
+    <div class="result-stat correct-stat"><div class="result-stat-num" id="correctCount">0</div><div class="result-stat-label">Benar ✓</div></div>
+    <div class="result-stat wrong-stat"><div class="result-stat-num" id="wrongCount">0</div><div class="result-stat-label">Salah ✗</div></div>
+    <div class="result-stat time-stat"><div class="result-stat-num" id="timeUsed">0s</div><div class="result-stat-label">Waktu</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-primary" onclick="openDiffModal()">MAIN LAGI! 🎮</button>
+    <button class="btn-outline" onclick="openLeaderboard()">Leaderboard 🏆</button>
+    <button class="btn-outline" onclick="goHome()">Home 🏠</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: AUTH ===== -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-title">Welcome!</div>
+    <p class="auth-subtitle">Login atau daftar untuk simpan skor kamu</p>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Daftar</button>
+    </div>
+    <!-- Login -->
+    <div id="form-login">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="login-username" type="text" placeholder="Masukkan username...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="login-password" type="password" placeholder="Masukkan password...">
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="handleLogin()">LOGIN →</button>
+      <div style="text-align:center;margin-top:1rem;">
+        <button onclick="guestPlay()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;text-decoration:underline;">Main sebagai tamu</button>
+      </div>
+    </div>
+    <!-- Register -->
+    <div id="form-register" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="reg-username" type="text" placeholder="Pilih username kamu...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="reg-password" type="password" placeholder="Buat password...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pilih Avatar</label>
+        <div class="avatar-row">
+          <div class="avatar-opt selected" data-avatar="🦊" onclick="selectAvatar(this)">🦊</div>
+          <div class="avatar-opt" data-avatar="🐉" onclick="selectAvatar(this)">🐉</div>
+          <div class="avatar-opt" data-avatar="⚡" onclick="selectAvatar(this)">⚡</div>
+          <div class="avatar-opt" data-avatar="🌸" onclick="selectAvatar(this)">🌸</div>
+          <div class="avatar-opt" data-avatar="🔥" onclick="selectAvatar(this)">🔥</div>
+          <div class="avatar-opt" data-avatar="🌙" onclick="selectAvatar(this)">🌙</div>
+          <div class="avatar-opt" data-avatar="⚔️" onclick="selectAvatar(this)">⚔️</div>
+          <div class="avatar-opt" data-avatar="🎭" onclick="selectAvatar(this)">🎭</div>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="handleRegister()">DAFTAR →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: LEADERBOARD ===== -->
+<div class="modal-overlay" id="lbModal">
+  <div class="modal-box lb-modal-box">
+    <button class="modal-close" onclick="closeLeaderboard()">✕</button>
+    <div class="lb-title">🏆 LEADERBOARD</div>
+    <div class="lb-subtitle">Best score tiap player per difficulty — siapa yang paling jago?</div>
+    <div class="lb-tabs">
+      <button class="lb-tab t-random active" onclick="switchLbTab('random',this)">🎲 Random</button>
+      <button class="lb-tab t-easy" onclick="switchLbTab('easy',this)">⚡ Easy</button>
+      <button class="lb-tab t-medium" onclick="switchLbTab('medium',this)">🔥 Medium</button>
+      <button class="lb-tab t-hard" onclick="switchLbTab('hard',this)">💀 Hard</button>
+    </div>
+    <div class="lb-podium" id="lbPodium"></div>
+    <div class="lb-list" id="lbList">
+      <div class="lb-loading">Loading... ⏳</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: DIFFICULTY SELECTOR ===== -->
+<div class="modal-overlay" id="diffModal">
+  <div class="modal-box diff-modal-box">
+    <button class="modal-close" onclick="closeDiffModal()">✕</button>
+    <div class="diff-modal-title">⚔️ PILIH DIFFICULTY</div>
+    <div class="diff-modal-sub">Pilih tingkat kesulitan soal yang ingin kamu hadapi!</div>
+    <div class="diff-cards">
+      <div class="diff-card random" onclick="startQuiz('random')">
+        <span class="diff-card-emoji">🎲</span>
+        <span class="diff-card-name">RANDOM</span>
+        <span class="diff-card-desc">Campuran semua difficulty</span>
+        <span class="diff-card-soal">400+ soal</span>
+      </div>
+      <div class="diff-card easy" onclick="startQuiz('easy')">
+        <span class="diff-card-emoji">⚡</span>
+        <span class="diff-card-name">EASY</span>
+        <span class="diff-card-desc">Cocok untuk pemula</span>
+        <span class="diff-card-soal">150+ soal</span>
+      </div>
+      <div class="diff-card medium" onclick="startQuiz('medium')">
+        <span class="diff-card-emoji">🔥</span>
+        <span class="diff-card-name">MEDIUM</span>
+        <span class="diff-card-desc">Tantangan sesungguhnya</span>
+        <span class="diff-card-soal">120+ soal</span>
+      </div>
+      <div class="diff-card hard" onclick="startQuiz('hard')">
+        <span class="diff-card-emoji">💀</span>
+        <span class="diff-card-name">HARD</span>
+        <span class="diff-card-desc">Hanya untuk true otaku!</span>
+        <span class="diff-card-soal">135+ soal</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: E-CATALOGUE ===== -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box cat-modal-box">
+    <button class="modal-close" onclick="closeCatalogue()">✕</button>
+    <div class="cat-modal-title">📖 E-Catalogue</div>
+    <div class="cat-modal-sub">Semua kategori soal yang tersedia di OtakuQuiz</div>
+    <div class="cat-grid">
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">⚔️</span>
+          <span class="cat-card-name">Action</span>
+        </div>
+        <div class="cat-card-desc">Soal seputar anime action paling populer seperti Attack on Titan, Demon Slayer, dan Jujutsu Kaisen.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">20+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🏴‍☠️</span>
+          <span class="cat-card-name">One Piece</span>
+        </div>
+        <div class="cat-card-desc">Uji pengetahuanmu tentang dunia bajak laut — dari buah iblis, Haki, hingga teknik Gear Luffy!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">18+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🍥</span>
+          <span class="cat-card-name">Naruto</span>
+        </div>
+        <div class="cat-card-desc">Dari jutsu, klan, hingga fakta tersembunyi dunia shinobi yang hanya diketahui true fans!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="cat-count">15+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">📚</span>
+          <span class="cat-card-name">Manga</span>
+        </div>
+        <div class="cat-card-desc">Soal tentang manga legendaris seperti Berserk, Vagabond, Vinland Saga, dan karya mangaka ternama.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">15+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🔮</span>
+          <span class="cat-card-name">Isekai & Sci-Fi</span>
+        </div>
+        <div class="cat-card-desc">Soal dari anime isekai & sci-fi hits seperti Re:Zero, Steins;Gate, Overlord, dan Sword Art Online.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">20+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🎬</span>
+          <span class="cat-card-name">Trivia & Studio</span>
+        </div>
+        <div class="cat-card-desc">Fakta unik seputar industri anime — studio, sutradara, penghargaan, dan hal-hal di balik layar!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="cat-count">18+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">💀</span>
+          <span class="cat-card-name">Dark Anime</span>
+        </div>
+        <div class="cat-card-desc">Soal dari anime bertema gelap seperti Tokyo Ghoul, Death Note, Code Geass, dan Hunter x Hunter.</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">15+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🌟</span>
+          <span class="cat-card-name">Classic</span>
+        </div>
+        <div class="cat-card-desc">Anime legendaris yang membentuk industri anime modern — dari EVA, Dragon Ball, hingga Bleach!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">10+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🎵</span>
+          <span class="cat-card-name">Opening Anime</span>
+        </div>
+        <div class="cat-card-desc">Seberapa hafal kamu judul opening favorit? Dari Naruto, AoT, sampai opening tersembunyi yang jarang dikenal!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">30+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">🏐</span>
+          <span class="cat-card-name">Sports Anime</span>
+        </div>
+        <div class="cat-card-desc">Soal seru dari anime olahraga seperti Haikyuu!! — uji seberapa dalam kamu tahu dunia voli!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">8+ soal</span>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-emoji">💫</span>
+          <span class="cat-card-name">JoJo's Bizarre</span>
+        </div>
+        <div class="cat-card-desc">Soal dari semua Part JoJo's Bizarre Adventure — Stand, Hamon, dan fakta bizarre yang WRRRYYY!</div>
+        <div class="cat-card-footer">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="cat-count">8+ soal</span>
+        </div>
+      </div>
+
+    </div>
+    <div style="text-align:center;margin-top:1.2rem;">
+      <button class="btn-primary" style="font-size:1.1rem;padding:0.8rem 2rem;" onclick="closeCatalogue(); handlePlayBtn();">MAIN SEKARANG! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SUPABASE =====
+const SUPABASE_URL = 'https://iwvkfxejhubacachspai.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3dmtmeGVqaHViYWNhY2hzcGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MTU5MTMsImV4cCI6MjA4Nzk5MTkxM30.B5BcB58G510qeni_rsDZLdDvcliN30MiHd1w6ELzHGI';
+
+async function sbFetch(path, method = 'GET', body = null) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : null
+    });
+    return res.json();
+  } catch(e) { console.warn('Supabase error:', e); return null; }
+}
+
+async function registerToSupabase(username, password, avatar) {
+  return sbFetch('users', 'POST', { username, password, avatar });
+}
+async function loginFromSupabase(username, password) {
+  const data = await sbFetch(`users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=*`);
+  return (data && data[0]) || null;
+}
+async function saveScore(username, avatar, score, correct, difficulty) {
+  // 1. Simpan ke tabel scores (history lengkap)
+  await sbFetch('scores', 'POST', { username, avatar, score, correct, total: 10, difficulty: difficulty || 'random' });
+  // 2. Upsert ke best_scores via RPC — ini yang dipakai leaderboard
+  return sbFetch('rpc/upsert_best_score', 'POST', {
+    p_username: username,
+    p_avatar: avatar,
+    p_score: score,
+    p_correct: correct,
+    p_difficulty: difficulty || 'random'
+  });
+}
+
+async function getLeaderboard(difficulty) {
+  // Gunakan RPC function — langsung return top 20 best score per difficulty
+  const data = await sbFetch('rpc/get_leaderboard', 'POST', {
+    p_difficulty: difficulty || 'random'
+  });
+  if (!data || !Array.isArray(data)) return [];
+  // Rename field agar konsisten dengan render function
+  return data.map(row => ({
+    username: row.username,
+    avatar: row.avatar,
+    score: row.best_score,
+    correct: row.best_correct,
+    gamesPlayed: row.games_played
+  }));
+}
+
+// ===== QUESTIONS (400+) =====
+const questions = [
+  // ===== EASY =====
+  { q: "Siapa pencipta anime/manga 'Naruto'?", options: ["Masashi Kishimoto","Eiichiro Oda","Akira Toriyama","Tite Kubo"], ans: 0, cat: "Trivia", diff: "Easy" },
+  { q: "Di One Piece, buah iblis apa yang dimakan Monkey D. Luffy?", options: ["Mera Mera no Mi","Gomu Gomu no Mi","Gura Gura no Mi","Yami Yami no Mi"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Anime mana yang menampilkan karakter 'Levi Ackerman'?", options: ["Fullmetal Alchemist","Demon Slayer","Attack on Titan","Jujutsu Kaisen"], ans: 2, cat: "Action", diff: "Easy" },
+  { q: "Studio mana yang memproduksi 'Spirited Away'?", options: ["Toei Animation","Madhouse","Studio Ghibli","Kyoto Animation"], ans: 2, cat: "Studio", diff: "Easy" },
+  { q: "Dalam Naruto, teknik terkenal Naruto yang paling ikonik adalah?", options: ["Rasengan","Chidori","Shadow Clone Jutsu","Amaterasu"], ans: 0, cat: "Naruto", diff: "Easy" },
+  { q: "Anime 'Dragon Ball' dibuat oleh siapa?", options: ["Yoshihiro Togashi","Akira Toriyama","Naoki Urasawa","Rumiko Takahashi"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Siapa musuh utama di arc Marineford dalam One Piece?", options: ["Kaido","Blackbeard","Akainu","Big Mom"], ans: 2, cat: "One Piece", diff: "Easy" },
+  { q: "Pikachu adalah starter Pokemon milik siapa?", options: ["Gary Oak","Ash Ketchum","Brock","Misty"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Karakter mana yang menggunakan 'Death Note'?", options: ["Light Yagami","L Lawliet","Near","Mello"], ans: 0, cat: "Death Note", diff: "Easy" },
+  { q: "Di Sword Art Online, nama game pertama yang dimainkan Kirito adalah?", options: ["Alfheim Online","Gun Gale Online","Sword Art Online","Underworld"], ans: 2, cat: "SAO", diff: "Easy" },
+  { q: "Anime 'My Hero Academia' bersetting di dunia dimana kebanyakan orang memiliki kemampuan yang disebut?", options: ["Quirks","Powers","Abilities","Sharingan"], ans: 0, cat: "MHA", diff: "Easy" },
+  { q: "Dalam Bleach, Ichigo Kurosaki adalah seorang?", options: ["Shinigami","Hollow","Quincy","Substitute Shinigami"], ans: 3, cat: "Bleach", diff: "Easy" },
+  { q: "Siapa captain kapal Thousand Sunny di One Piece?", options: ["Zoro","Luffy","Nami","Usopp"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di Fairy Tail, nama guild utama adalah?", options: ["Blue Pegasus","Sabertooth","Fairy Tail","Lamia Scale"], ans: 2, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Anime 'Your Name' (Kimi no Na wa) disutradarai oleh?", options: ["Hayao Miyazaki","Makoto Shinkai","Satoshi Kon","Mamoru Hosoda"], ans: 1, cat: "Film", diff: "Easy" },
+  { q: "Di Demon Slayer, siapa kakak perempuan Tanjiro yang diubah jadi iblis?", options: ["Kanao","Aoi","Nezuko","Shinobu"], ans: 2, cat: "Kimetsu", diff: "Easy" },
+  { q: "Dalam Dragon Ball Z, transformasi paling ikonik Goku adalah?", options: ["Ultra Instinct","Super Saiyan","Super Saiyan Blue","Great Ape"], ans: 1, cat: "Action", diff: "Easy" },
+  { q: "Di Attack on Titan, Eren Yeager tinggal di distrik mana pada awal cerita?", options: ["Stohess","Trost","Shiganshina","Orvud"], ans: 2, cat: "AoT", diff: "Easy" },
+  { q: "Karakter Naruto berasal dari desa ninja mana?", options: ["Desa Pasir","Desa Daun","Desa Awan","Desa Kabut"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Di One Piece, siapa navigator kapal Mugiwara?", options: ["Robin","Nami","Vivi","Hancock"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Anime 'Haikyuu!!' bercerita tentang olahraga apa?", options: ["Basket","Sepak bola","Voli","Bulu tangkis"], ans: 2, cat: "Sports", diff: "Easy" },
+  { q: "Di Jujutsu Kaisen, siapa guru Yuji Itadori?", options: ["Gojo Satoru","Nanami Kento","Suguru Geto","Yuta Okkotsu"], ans: 0, cat: "JJK", diff: "Easy" },
+  { q: "Di Hunter x Hunter, nama grup pembunuh bayaran elit adalah?", options: ["Phantom Troupe","Zoldyck Family","Chimera Ants","Ryodan"], ans: 0, cat: "HxH", diff: "Easy" },
+  { q: "Anime 'One Punch Man' bercerita tentang pahlawan bernama?", options: ["Genos","Bang","Saitama","King"], ans: 2, cat: "Action", diff: "Easy" },
+  { q: "Di Fullmetal Alchemist, Edward Elric kehilangan anggota tubuh mana?", options: ["Tangan kanan dan kaki kiri","Tangan kiri dan kaki kanan","Kedua tangan","Kedua kaki"], ans: 0, cat: "FMA", diff: "Easy" },
+  { q: "Manga Shonen Jump paling laris sepanjang masa adalah?", options: ["Naruto","Dragon Ball","One Piece","Bleach"], ans: 2, cat: "Trivia", diff: "Easy" },
+  { q: "Di Re:Zero, nama gadis berhair perak yang Subaru cintai adalah?", options: ["Emilia","Rem","Ram","Beatrice"], ans: 0, cat: "Isekai", diff: "Easy" },
+  { q: "Di Black Clover, guild Asta bernama?", options: ["Golden Dawn","Black Bull","Silver Eagle","Crimson Lion"], ans: 1, cat: "Magic", diff: "Easy" },
+  { q: "Di Sword Art Online, nama ibu angkat Kirito di game adalah?", options: ["Asuna","Yui","Suguha","Sinon"], ans: 1, cat: "SAO", diff: "Easy" },
+  { q: "Di My Hero Academia, nama hero All Might sebenarnya adalah?", options: ["Toshinori Yagi","Shouta Aizawa","Hizashi Yamada","Nemuri Kayama"], ans: 0, cat: "MHA", diff: "Easy" },
+  { q: "Di Bleach, zanpakuto Ichigo bernama?", options: ["Zangetsu","Senbonzakura","Benihime","Ryujin Jakka"], ans: 0, cat: "Bleach", diff: "Easy" },
+  { q: "Dalam Fairy Tail, nama sihir andalan Natsu adalah?", options: ["Ice Make","Fire Dragon Slayer","Celestial Spirit","Requip"], ans: 1, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di anime Tokyo Ghoul, Ken Kaneki bekerja di kedai kopi bernama?", options: ["Anteiku","Re:","Helter Skelter","Daikichi"], ans: 0, cat: "Dark", diff: "Easy" },
+  { q: "Kimetsu no Yaiba adalah judul Jepang dari anime?", options: ["My Hero Academia","Demon Slayer","Jujutsu Kaisen","Black Clover"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Di One Piece, Roronoa Zoro bercita-cita menjadi?", options: ["Penjelajah terhebat","Penembak jitu terbaik","Pedang terkuat di dunia","Navigator terbaik"], ans: 2, cat: "One Piece", diff: "Easy" },
+  { q: "Anime 'Sword Art Online' diadaptasi dari?", options: ["Manga","Light Novel","Visual Novel","Game"], ans: 1, cat: "SAO", diff: "Easy" },
+  { q: "Di Haikyuu, Shoyo Hinata bermain di posisi?", options: ["Setter","Libero","Ace/Wing Spiker","Middle Blocker"], ans: 2, cat: "Sports", diff: "Easy" },
+  { q: "Di Naruto Shippuden, organisasi antagonis utama bernama?", options: ["Sound Four","Akatsuki","Seven Swordsmen","ROOT"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Karakter 'Mikasa Ackerman' berasal dari anime?", options: ["Demon Slayer","Jujutsu Kaisen","Attack on Titan","Bleach"], ans: 2, cat: "AoT", diff: "Easy" },
+  { q: "Di Dragon Ball, bola naga berjumlah berapa buah?", options: ["5","6","7","8"], ans: 2, cat: "Action", diff: "Easy" },
+
+  // ===== MEDIUM =====
+  { q: "Karakter mana yang memiliki kekuatan 'Nen' di Hunter x Hunter?", options: ["Ichigo Kurosaki","Gon Freecss","Naruto Uzumaki","Edward Elric"], ans: 1, cat: "HxH", diff: "Medium" },
+  { q: "Di Demon Slayer, breathing style apa yang digunakan Tanjiro Kamado?", options: ["Thunder Breathing","Flame Breathing","Water Breathing","Wind Breathing"], ans: 2, cat: "Kimetsu", diff: "Medium" },
+  { q: "Manga 'Berserk' dibuat oleh siapa?", options: ["Kentaro Miura","Hajime Isayama","Yoshihiro Togashi","Naoki Urasawa"], ans: 0, cat: "Manga", diff: "Medium" },
+  { q: "Dalam FMA Brotherhood, apa yang Edward dan Alphonse Elric cari?", options: ["Holy Grail","Philosopher's Stone","Dragon Ball","Death Note"], ans: 1, cat: "FMA", diff: "Medium" },
+  { q: "Anime 'Neon Genesis Evangelion' dibuat oleh studio apa?", options: ["Gainax","Madhouse","Bones","MAPPA"], ans: 0, cat: "Classic", diff: "Medium" },
+  { q: "Di JoJo's Bizarre Adventure, Stand milik Jotaro Kujo adalah?", options: ["The World","Star Platinum","Crazy Diamond","Gold Experience"], ans: 1, cat: "JoJo", diff: "Medium" },
+  { q: "Di anime Re:Zero, nama witch of Envy yang menghantui Subaru adalah?", options: ["Echidna","Satella","Carmilla","Typhon"], ans: 1, cat: "Isekai", diff: "Medium" },
+  { q: "Dalam Tokyo Ghoul, Ken Kaneki adalah?", options: ["Full Ghoul","One-Eyed Ghoul","Human","Half-Human Half-Ghoul"], ans: 3, cat: "Dark", diff: "Medium" },
+  { q: "Di Sword Art Online, siapa yang menciptakan game SAO?", options: ["Kayaba Akihiko","Sugou Nobuyuki","Asuna Yuuki","Yui"], ans: 0, cat: "SAO", diff: "Medium" },
+  { q: "Dalam Attack on Titan, Titan terbesar yang dikenal adalah?", options: ["Armored Titan","Colossal Titan","Founding Titan","Beast Titan"], ans: 1, cat: "AoT", diff: "Medium" },
+  { q: "Di Naruto, sharingan adalah kemampuan milik klan apa?", options: ["Hyuga","Uchiha","Senju","Uzumaki"], ans: 1, cat: "Naruto", diff: "Medium" },
+  { q: "Dalam Hunter x Hunter, Nen type milik Gon adalah?", options: ["Transmutation","Emission","Enhancement","Manipulation"], ans: 2, cat: "HxH", diff: "Medium" },
+  { q: "Anime 'Steins;Gate' bercerita tentang?", options: ["Mechs dan perang","Time travel","Magic school","Shonen battle"], ans: 1, cat: "Sci-Fi", diff: "Medium" },
+  { q: "Di My Hero Academia, All Might mewariskan One For All kepada?", options: ["Todoroki","Bakugo","Izuku Midoriya","Iida"], ans: 2, cat: "MHA", diff: "Medium" },
+  { q: "Karakter 'L' di Death Note memiliki nama asli?", options: ["L Lawliet","L Williams","L Moriarty","Tidak pernah disebutkan"], ans: 0, cat: "Death Note", diff: "Medium" },
+  { q: "Di One Piece, teknik Haki yang paling langka adalah?", options: ["Armament Haki","Observation Haki","Conqueror's Haki","Barrier Haki"], ans: 2, cat: "One Piece", diff: "Medium" },
+  { q: "Anime pertama yang menang Oscar untuk film animasi terbaik?", options: ["Princess Mononoke","My Neighbor Totoro","Spirited Away","Howl's Moving Castle"], ans: 2, cat: "Trivia", diff: "Medium" },
+  { q: "Di Demon Slayer, Sound Hashira adalah?", options: ["Rengoku","Tengen Uzui","Giyu Tomioka","Shinobu Kocho"], ans: 1, cat: "Kimetsu", diff: "Medium" },
+  { q: "Dalam Black Clover, Asta tidak memiliki?", options: ["Mana","Magic","Sword","Friends"], ans: 1, cat: "Magic", diff: "Medium" },
+  { q: "Di Fullmetal Alchemist, prinsip dasar alkimia yang tidak bisa dilanggar adalah?", options: ["Truth","Equivalent Exchange","The Gate","Philosopher's Law"], ans: 1, cat: "FMA", diff: "Medium" },
+  { q: "Di Haikyuu, setter andalan Karasuno High bernama?", options: ["Shoyo Hinata","Tobio Kageyama","Kei Tsukishima","Tadashi Yamaguchi"], ans: 1, cat: "Sports", diff: "Medium" },
+  { q: "Di One Piece, Sanji memiliki julukan lain sebagai?", options: ["Knight of the Sea","Black Leg","King of Hell","Dark King"], ans: 1, cat: "One Piece", diff: "Medium" },
+  { q: "Di Jujutsu Kaisen, Yuji Itadori menelan jari siapa?", options: ["Gojo Satoru","Mahito","Ryomen Sukuna","Suguru Geto"], ans: 2, cat: "JJK", diff: "Medium" },
+  { q: "Di Naruto, teknik andalan Sasuke Uchiha adalah?", options: ["Rasengan","Chidori","Amaterasu","Shadow Clone Jutsu"], ans: 1, cat: "Naruto", diff: "Medium" },
+  { q: "Di Hunter x Hunter, Killua Zoldyck menggunakan Nen type?", options: ["Enhancement","Transmutation","Emission","Manipulation"], ans: 1, cat: "HxH", diff: "Medium" },
+  { q: "Di Demon Slayer, siapa Flame Hashira yang gugur melawan Akaza?", options: ["Giyu Tomioka","Kyojuro Rengoku","Tengen Uzui","Sanemi Shinazugawa"], ans: 1, cat: "Kimetsu", diff: "Medium" },
+  { q: "Di Attack on Titan, Survey Corps dipimpin oleh?", options: ["Erwin Smith","Hange Zoe","Levi Ackerman","Pyxis"], ans: 0, cat: "AoT", diff: "Medium" },
+  { q: "Di My Hero Academia, Quirk milik Bakugo adalah?", options: ["One For All","Half-Cold Half-Hot","Explosion","Engine"], ans: 2, cat: "MHA", diff: "Medium" },
+  { q: "Di Bleach, bentuk bankai Ichigo bernama?", options: ["Tensa Zangetsu","Daiguren Hyorinmaru","Senbonzakura Kageyoshi","Kamishini no Yari"], ans: 0, cat: "Bleach", diff: "Medium" },
+  { q: "Di Fairy Tail, pasangan sihir Natsu dan Lucy adalah?", options: ["Ice-Make dan Celestial Spirit","Fire Dragon Slayer dan Celestial Spirit","Requip dan Sky God Slayer","Crash dan Heavenly Body"], ans: 1, cat: "Fairy Tail", diff: "Medium" },
+  { q: "Di Death Note, kira siapa yang akhirnya mengalahkan Light?", options: ["L","Near","Mello","Matsuda"], ans: 1, cat: "Death Note", diff: "Medium" },
+  { q: "Di Re:Zero, nama kembar meido merah putih adalah?", options: ["Elsa dan Meili","Ram dan Rem","Frederica dan Petra","Beatrice dan Echidna"], ans: 1, cat: "Isekai", diff: "Medium" },
+  { q: "Di Code Geass, Zero adalah nama samaran dari?", options: ["Suzaku Kururugi","Charles zi Britannia","Lelouch vi Britannia","Schneizel el Britannia"], ans: 2, cat: "Code Geass", diff: "Medium" },
+  { q: "Di Overlord, nama kerajaan undead yang Ainz pimpin adalah?", options: ["Sorcerer Kingdom","Great Tomb of Nazarick","Baharuth Empire","Re-Estize Kingdom"], ans: 0, cat: "Isekai", diff: "Medium" },
+  { q: "Di Tokyo Ghoul, nama organisasi pemerintah pembasmi ghoul adalah?", options: ["V","CCG","Aogiri Tree","Clowns"], ans: 1, cat: "Dark", diff: "Medium" },
+  { q: "Di JoJo Part 2, nama Stand/kekuatan milik Joseph Joestar adalah?", options: ["Hermit Purple","Ripple/Hamon","Crazy Diamond","Magician's Red"], ans: 1, cat: "JoJo", diff: "Medium" },
+  { q: "Di Haikyuu, sekolah rival utama Karasuno di musim pertama adalah?", options: ["Aoba Johsai","Nekoma","Fukurodani","Shiratorizawa"], ans: 0, cat: "Sports", diff: "Medium" },
+  { q: "Di Steins;Gate, nama lab tempat Okabe dan teman-teman bekerja adalah?", options: ["Future Gadget Laboratory","Science Lab","Time Machine Club","Divergence Lab"], ans: 0, cat: "Sci-Fi", diff: "Medium" },
+  { q: "Di Naruto, Nine-Tails Fox yang bersemayam dalam diri Naruto bernama?", options: ["Gyuki","Shukaku","Kurama","Saiken"], ans: 2, cat: "Naruto", diff: "Medium" },
+  { q: "Di One Piece, Devil Fruit milik Trafalgar Law adalah?", options: ["Ope Ope no Mi","Mori Mori no Mi","Noro Noro no Mi","Pika Pika no Mi"], ans: 0, cat: "One Piece", diff: "Medium" },
+  { q: "Di FMA Brotherhood, Homunculus yang mewakili keserakahan bernama?", options: ["Lust","Greed","Envy","Pride"], ans: 1, cat: "FMA", diff: "Medium" },
+  { q: "Anime 'Vinland Saga' berlatar di zaman?", options: ["Jepang feodal","Era Viking","Perang Dunia II","Zaman Romawi"], ans: 1, cat: "Manga", diff: "Medium" },
+  { q: "Di My Hero Academia, Erasure Hero yang bisa menghapus Quirk orang lain bernama?", options: ["Present Mic","Midnight","Eraserhead","Vlad King"], ans: 2, cat: "MHA", diff: "Medium" },
+  { q: "Di JJK, Domain Expansion milik Gojo bernama?", options: ["Coffin of the Iron Mountain","Idle Death Gamble","Infinite Void","Malevolent Shrine"], ans: 2, cat: "JJK", diff: "Medium" },
+  { q: "Di Dragon Ball Super, transformasi terkuat Goku disebut?", options: ["Super Saiyan 4","Super Saiyan God","Ultra Instinct","Super Saiyan Blue Evolution"], ans: 2, cat: "Action", diff: "Medium" },
+  { q: "Anime 'No Game No Life' bercerita tentang dua kakak beradik bernama?", options: ["Sora dan Shiro","Kirito dan Asuna","Subaru dan Emilia","Kazuma dan Aqua"], ans: 0, cat: "Isekai", diff: "Medium" },
+
+  // ===== HARD =====
+  { q: "Berapa jumlah Titan Shifter yang ada dalam Attack on Titan?", options: ["7","9","10","12"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Di One Piece, teknik 'Gear Fourth' dari Luffy bernama?", options: ["Boundman","Snakeman","Tankman","Gearman"], ans: 0, cat: "One Piece", diff: "Hard" },
+  { q: "Siapa yang menulis light novel 'Sword Art Online'?", options: ["Reki Kawahara","Kazuma Kamachi","Kugane Maruyama","Tappei Nagatsuki"], ans: 0, cat: "LN", diff: "Hard" },
+  { q: "Di Code Geass, kekuatan Geass milik Lelouch memiliki kemampuan?", options: ["Melihat masa depan","Membaca pikiran","Perintah mutlak","Menghentikan waktu"], ans: 2, cat: "Code Geass", diff: "Hard" },
+  { q: "Manga 'Vagabond' adalah adaptasi dari novel?", options: ["Musashi","Taiko","Itto","Shogun"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di Jujutsu Kaisen, Cursed Technique milik Gojo Satoru adalah?", options: ["Infinity","Limitless","Six Eyes","Ten Shadows"], ans: 1, cat: "JJK", diff: "Hard" },
+  { q: "Di Hunter x Hunter, nama teknik tertinggi Nen disebut?", options: ["Nen Burst","Zetsu","Gon and Killua's Godspeed","Vow and Limitation"], ans: 3, cat: "HxH", diff: "Hard" },
+  { q: "Dalam Evangelion, singkatan NERV berasal dari kata Jerman yang berarti?", options: ["Saraf","Kekuatan","Harapan","Perang"], ans: 0, cat: "Classic", diff: "Hard" },
+  { q: "Di Re:Zero, kemampuan Subaru Natsuki disebut?", options: ["Time Leap","Return by Death","Reset","Death Loop"], ans: 1, cat: "Isekai", diff: "Hard" },
+  { q: "Dalam Berserk, pedang milik Guts bernama?", options: ["Dragonslayer","Godhand","Beherit","Berserker Armor"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di JoJo Part 4, nama Stand milik Yoshikage Kira adalah?", options: ["Crazy Diamond","Killer Queen","Gold Experience","Sticky Fingers"], ans: 1, cat: "JoJo", diff: "Hard" },
+  { q: "Siapa author manga 'Vinland Saga'?", options: ["Makoto Yukimura","Naoki Urasawa","Hiroaki Samura","Kentaro Miura"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di Attack on Titan, Founding Titan dimiliki oleh keturunan klan apa?", options: ["Ackerman","Reiss","Tybur","Marley"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Dalam Jujutsu Kaisen, Ryomen Sukuna memiliki berapa jari?", options: ["10","15","20","22"], ans: 2, cat: "JJK", diff: "Hard" },
+  { q: "Di Steins;Gate, nama organisasi yang mengejar Okabe adalah?", options: ["SERN","CERN","DARPA","Rounders"], ans: 0, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Dalam Overlord, nama guild Ainz di game YGGDRASIL adalah?", options: ["Nazarick","Ainz Ooal Gown","Six Great Gods","Slane Theocracy"], ans: 1, cat: "Isekai", diff: "Hard" },
+  { q: "Di Naruto, nama teknik kombinasi Naruto dan Sasuke yang hanya dipakai sekali adalah?", options: ["Scorch Style: Nimbus Tempest","Indra's Arrow","Jigen's Jutsu","Shuriken Shadow Clone Jutsu"], ans: 0, cat: "Naruto", diff: "Hard" },
+  { q: "Di One Piece, berapa tahun Nico Robin menjadi buronan sejak kecil?", options: ["10 tahun","20 tahun","8 tahun","30 tahun"], ans: 1, cat: "One Piece", diff: "Hard" },
+  { q: "Di Hunter x Hunter, Chimera Ant King bernama?", options: ["Neferpitou","Meruem","Shaiapouf","Menthuthuyoupi"], ans: 1, cat: "HxH", diff: "Hard" },
+  { q: "Di FMA Brotherhood, siapa Homunculus yang berada di dalam Führer King Bradley?", options: ["Greed","Wrath","Envy","Sloth"], ans: 1, cat: "FMA", diff: "Hard" },
+  { q: "Di Demon Slayer, teknik terakhir Sun Breathing disebut?", options: ["Clear Blue Sky","Beneficent Radiance","The Fire Wheel","Thirteenth Form"], ans: 3, cat: "Kimetsu", diff: "Hard" },
+  { q: "Di Attack on Titan, kepanjangan dari 'ODM' adalah?", options: ["Omni-Directional Mobility","Omnidirectional Maneuvering","Offensive-Defensive Movement","Overhead Descent Mechanism"], ans: 0, cat: "AoT", diff: "Hard" },
+  { q: "Di JoJo Part 5, nama gang yang Giorno bergabung adalah?", options: ["Speedwagon Foundation","Passione","Bucciarati Team","Diavolo's Gang"], ans: 1, cat: "JoJo", diff: "Hard" },
+  { q: "Di Bleach, Sosuke Aizen menggunakan zanpakuto bernama?", options: ["Ryujin Jakka","Kyoka Suigetsu","Kinshara","Ichimonji"], ans: 1, cat: "Bleach", diff: "Hard" },
+  { q: "Di My Hero Academia, nama villain yang memiliki All For One Quirk adalah?", options: ["Tomura Shigaraki","Kurogiri","Dabi","All For One"], ans: 3, cat: "MHA", diff: "Hard" },
+  { q: "Di Naruto, siapa yang pertama kali menggunakan Edo Tensei (Reanimation Jutsu)?", options: ["Orochimaru","Kabuto","Tobirama Senju","Madara Uchiha"], ans: 2, cat: "Naruto", diff: "Hard" },
+  { q: "Di One Piece, berapa jumlah anggota original Shicibukai (Seven Warlords)?", options: ["5","6","7","8"], ans: 2, cat: "One Piece", diff: "Hard" },
+  { q: "Di Haikyuu, pelatih kepala Karasuno bernama?", options: ["Ittetsu Takeda","Keishin Ukai","Nobuteru Irihata","Hirofumi Washijo"], ans: 1, cat: "Sports", diff: "Hard" },
+  { q: "Di Re:Zero, Witch of Greed yang menjaga Great Library bernama?", options: ["Satella","Echidna","Sekhmet","Daphne"], ans: 1, cat: "Isekai", diff: "Hard" },
+  { q: "Di Death Note, berapa lama manusia yang namanya ditulis di Death Note akan meninggal secara default?", options: ["30 detik","40 detik","60 detik","10 menit"], ans: 1, cat: "Death Note", diff: "Hard" },
+  { q: "Di Steins;Gate, D-Mail pertama yang dikirim Okabe ke masa lalu berisi tentang?", options: ["Kematian Kurisu","Hasil Lotto","Perlombaan Braun Tube Workshop","Lokasi IBN 5100"], ans: 0, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Di Code Geass, nama mech yang dikendarai Lelouch adalah?", options: ["Lancelot","Guren","Shinkirou","Galahad"], ans: 2, cat: "Code Geass", diff: "Hard" },
+  { q: "Di JJK, Cursed Technique milik Megumi Fushiguro adalah?", options: ["Limitless","Ten Shadows Technique","Straw Doll Technique","Projection Sorcery"], ans: 1, cat: "JJK", diff: "Hard" },
+  { q: "Di Hunter x Hunter, berapa lapis test dalam ujian Hunter?", options: ["4","5","6","7"], ans: 1, cat: "HxH", diff: "Hard" },
+  { q: "Manga 'Monster' karya Naoki Urasawa berlatar di negara mana?", options: ["Jepang","Amerika","Jerman","Prancis"], ans: 2, cat: "Manga", diff: "Hard" },
+  { q: "Di FMA, istilah untuk manusia yang menjadi bahan Philosopher's Stone adalah?", options: ["Amestrian","Ishvalan","Sage's Stone","Sacrifice"], ans: 3, cat: "FMA", diff: "Hard" },
+  { q: "Di Fairy Tail, Dragon Slayer terkuat terakhir bernama?", options: ["Natsu","Gajeel","Laxus","Acnologia"], ans: 3, cat: "Fairy Tail", diff: "Hard" },
+  { q: "Di Overlord, Floor Guardian ke-7 yang mengontrol Great Library Ashurbanipal adalah?", options: ["Albedo","Shalltear","Demiurge","Victim"], ans: 3, cat: "Isekai", diff: "Hard" },
+  { q: "Di Demon Slayer, berapa jumlah Hashira pada awal cerita?", options: ["7","9","11","13"], ans: 1, cat: "Kimetsu", diff: "Hard" },
+  { q: "Di Attack on Titan, Operation Marley bertujuan untuk merebut kembali Titan shifter mana?", options: ["Jaw Titan","War Hammer Titan","Cart Titan","Armored Titan"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Di One Piece, Poneglyphs ditulis dalam bahasa kuno yang hanya bisa dibaca oleh?", options: ["Pejabat World Government","Orang-orang dari Ohara","Keturunan D","Warlords of the Sea"], ans: 1, cat: "One Piece", diff: "Hard" },
+  { q: "Di Haikyuu, 'Garbage Dump Combination' adalah nama teknik dari pasangan?", options: ["Hinata dan Kageyama","Kuroo dan Kenma","Bokuto dan Akaashi","Ushijima dan Tendou"], ans: 0, cat: "Sports", diff: "Hard" },
+  { q: "Di Bleach, Quincy emperor yang merupakan villain akhir bernama?", options: ["Uryu Ishida","Yhwach","Wandenreich","Jugram Haschwalth"], ans: 1, cat: "Bleach", diff: "Hard" },
+  { q: "Di My Hero Academia, nama villainous group yang dibentuk Shigaraki adalah?", options: ["Paranormal Liberation Front","League of Villains","Vanguard Action Squad","Meta Liberation Army"], ans: 1, cat: "MHA", diff: "Hard" },
+  { q: "Di Naruto, siapa Hokage ke-4 yang dikenal sebagai Yellow Flash?", options: ["Sarutobi","Jiraiya","Minato Namikaze","Tobirama Senju"], ans: 2, cat: "Naruto", diff: "Hard" },
+  { q: "Siapa penulis light novel 'Re:Zero Starting Life in Another World'?", options: ["Tappei Nagatsuki","Kugane Maruyama","Reki Kawahara","Yoshino Origuchi"], ans: 0, cat: "LN", diff: "Hard" },
+  { q: "Di JoJo Part 1, nama teknik supernatural yang Jonathan gunakan adalah?", options: ["Stand","Spin","Hamon/Ripple","Soft & Wet"], ans: 2, cat: "JoJo", diff: "Hard" },
+  { q: "Di Tokyo Ghoul, Kaneki akhirnya menjadi pemimpin ghoul dengan julukan?", options: ["One-Eyed King","Black Reaper","Centipede","Dragon"], ans: 0, cat: "Dark", diff: "Hard" },
+  { q: "Di Steins;Gate, kepanjangan dari divergence number yang Okabe pantau adalah?", options: ["World Line Number","Timeline Divergence Index","Attractor Field Rate","Divergence Meter Reading"], ans: 0, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Di Black Clover, Wizard King pertama yang mendirikan kerajaan Clover adalah?", options: ["Julius Novachrono","Lemiel Silvamillion Clover","Conrad Leto","Licht"], ans: 1, cat: "Magic", diff: "Hard" },
+  { q: "Di Hunter x Hunter, Gon menggunakan teknik yang mengancam nyawanya sendiri bernama?", options: ["Jajanken","Adult Gon Transformation","Godspeed","100-Type Guanyin Bodhisattva"], ans: 1, cat: "HxH", diff: "Hard" },
+  { q: "Di Attack on Titan, 'The Rumbling' menggunakan berapa banyak Colossal Titans?", options: ["Ratusan","Ribuan","Jutaan","Tidak terbatas"], ans: 2, cat: "AoT", diff: "Hard" },
+  { q: "Di One Piece, Elbaf adalah pulau legendaris milik ras?", options: ["Fishman","Giant","Mink","Sky People"], ans: 1, cat: "One Piece", diff: "Hard" },
+  { q: "Di FMA, Gate of Truth dilambangkan dengan?", options: ["Buku besar","Pintu raksasa berukir","Pohon keabadian","Bulan purnama"], ans: 1, cat: "FMA", diff: "Hard" },
+  { q: "Di Fairy Tail, nama mantra rahasia yang Zeref ciptakan untuk membunuh dirinya sendiri adalah?", options: ["Curse of Ankhseram","Etherious","Law","Neo Eclipse"], ans: 0, cat: "Fairy Tail", diff: "Hard" },
+  { q: "Di JJK, nama teknik yang bisa menyetarakan kondisi dalam domain disebut?", options: ["Simple Domain","Domain Expansion","Binding Vow","Reverse Cursed Technique"], ans: 0, cat: "JJK", diff: "Hard" },
+  { q: "Di Naruto, berapa banyak Biju (Tailed Beast) yang ada?", options: ["7","8","9","10"], ans: 2, cat: "Naruto", diff: "Hard" },
+  { q: "Di Haikyuu, 'The Invincible Ushiwaka' adalah julukan untuk?", options: ["Koutaro Bokuto","Wakatoshi Ushijima","Tetsuro Kuroo","Keiji Akaashi"], ans: 1, cat: "Sports", diff: "Hard" },
+  { q: "Dalam manga Berserk, God Hand terdiri dari berapa member?", options: ["4","5","6","7"], ans: 1, cat: "Manga", diff: "Hard" },
+  { q: "Di Death Note, shinigami yang memberikan Note kepada Light bernama?", options: ["Gelus","Rem","Ryuk","Armonia"], ans: 2, cat: "Death Note", diff: "Hard" },
+  { q: "Di Overlord, NPC paling setia kepada Ainz bernama?", options: ["Albedo","Shalltear Bloodfallen","Demiurge","Cocytus"], ans: 0, cat: "Isekai", diff: "Hard" },
+  { q: "Di Code Geass, Nunally vi Britannia adalah?", options: ["Saudara Lelouch yang buta dan lumpuh","Istri Schneizel","Permaisuri Britannia","Pilot Knightmare"], ans: 0, cat: "Code Geass", diff: "Hard" },
+  { q: "Di Bleach, Royal Guard (0 Division) terdiri dari berapa anggota?", options: ["4","5","6","7"], ans: 1, cat: "Bleach", diff: "Hard" },
+  { q: "Di My Hero Academia, Pro Hero yang dikenal sebagai 'Crimson Riot' adalah inspirasi bagi?", options: ["Bakugo","Kirishima","Todoroki","Ojiro"], ans: 1, cat: "MHA", diff: "Hard" },
+  { q: "Di Hunter x Hunter, pada arc mana Killua menemukan teknik Godspeed?", options: ["Yorknew City","Greed Island","Chimera Ant","Election"], ans: 2, cat: "HxH", diff: "Hard" },
+  { q: "Manga 'Uzumaki' karya siapa yang terkenal sebagai horror manga?", options: ["Junji Ito","Suehiro Maruo","Hideshi Hino","Kazuo Umezu"], ans: 0, cat: "Manga", diff: "Hard" },
+  { q: "Di Re:Zero, nama pelayan kepercayaan Roswaal bernama?", options: ["Frederica Baumann","Ryuzu Meyer","Lewes Meyer","Otto Suwen"], ans: 0, cat: "Isekai", diff: "Hard" },
+  { q: "Di JoJo's Bizarre Adventure Part 3, berapa lama perjalanan Stardust Crusaders ke Mesir?", options: ["30 hari","50 hari","70 hari","90 hari"], ans: 1, cat: "JoJo", diff: "Hard" },
+  { q: "Di Steins;Gate, versi 'beta worldline' adalah worldline di mana?", options: ["Kurisu selamat tapi Mayuri mati","Kurisu mati dan WWIII terjadi","Okabe tidak pernah ke masa lalu","Semua teman selamat"], ans: 1, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Di Attack on Titan, 'Paths' adalah dimensi yang menghubungkan semua?", options: ["Titan Shifter","Keturunan Ymir","Eldian","Anggota Survey Corps"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Di One Piece, nama pedang tingkat Saijo O Wazamono (tertinggi) yang dipegang Zoro adalah?", options: ["Shusui","Wado Ichimonji","Sandai Kitetsu","Enma"], ans: 3, cat: "One Piece", diff: "Hard" },
+  { q: "Di Demon Slayer, Kibutsuji Muzan menciptakan berapa tier iblis?", options: ["Kizuki (6 Upper + 6 Lower)","Kizuki (12 Upper)","Oni (10 tingkat)","Tidak ada tier resmi"], ans: 0, cat: "Kimetsu", diff: "Hard" },
+  { q: "Di FMA Brotherhood, Father menciptakan Homunculus dari kelemahannya sendiri. Sifat apa yang TIDAK ada dalam Father?", options: ["Greed","Lust","Pride","Love"], ans: 3, cat: "FMA", diff: "Hard" },
+  { q: "Di Naruto Shippuden, nama mode terkuat yang Naruto gunakan adalah?", options: ["Sage Mode","Tailed Beast Mode","Six Paths Sage Mode","Baryon Mode"], ans: 2, cat: "Naruto", diff: "Hard" },
+  { q: "Di Bleach, 5 war potentials (Sternritter Quincy) termasuk?", options: ["Aizen, Ichigo, Yamamoto, Urahara, Orihime","Ichigo, Urahara, Aizen, Renji, Rukia","Sado, Ishida, Orihime, Yoruichi, Isshin","Ichigo, Aizen, Urahara, Orihime, Yoruichi"], ans: 0, cat: "Bleach", diff: "Hard" },
+  { q: "Di My Hero Academia, 'Big 3' UA terdiri dari Mirio Togata, Tamaki Amajiki, dan?", options: ["Nejire Hado","Mei Hatsume","Itsuka Kendo","Pony Tsunotori"], ans: 0, cat: "MHA", diff: "Hard" },
+  { q: "Di Code Geass, Zero Requiem adalah rencana yang dirancang bersama oleh Lelouch dan?", options: ["Kallen","C.C.","Suzaku","Schneizel"], ans: 2, cat: "Code Geass", diff: "Hard" },
+  { q: "Di HxH, Kurapika menggunakan Nen type apa secara alami?", options: ["Specialization","Emission","Conjuration","Enhancement"], ans: 0, cat: "HxH", diff: "Hard" },
+  { q: "Di JJK, siapa Sorcerer Grade 1 yang dikenal sebagai 'The Sorcerer Killer'?", options: ["Choso","Toji Fushiguro","Suguru Geto","Naoya Zenin"], ans: 1, cat: "JJK", diff: "Hard" },
+  { q: "Siapa karakter utama dalam manga 'Vagabond'?", options: ["Sasaki Kojiro","Takeda Shingen","Miyamoto Musashi","Honda Tadakatsu"], ans: 2, cat: "Manga", diff: "Hard" },
+  { q: "Di Fairy Tail, 'Fairy Heart' adalah power dari?", options: ["Zeref","Mavis Vermillion","Acnologia","Natsu"], ans: 1, cat: "Fairy Tail", diff: "Hard" },
+  { q: "Di Overlord, level max Ainz Ooal Gown di YGGDRASIL adalah?", options: ["99","100","120","150"], ans: 1, cat: "Isekai", diff: "Hard" },
+  { q: "Di Tokyo Ghoul, nama quinque berbentuk kagune rate SSS yang dibuat dari kakuhou Rize adalah?", options: ["Jason","Doujima 1/2","Yukimura 1/3","Arima's quinque"], ans: 1, cat: "Dark", diff: "Hard" },
+  { q: "Di Haikyuu, 'The Little Giant' adalah inspirasi dari pemain professional mana?", options: ["Korai Hoshiumi","Kiyoomi Sakusa","Aran Ojiro","Shugo Meian"], ans: 0, cat: "Sports", diff: "Hard" },
+  { q: "Di Death Note, shinigami menggunakan Death Note untuk apa?", options: ["Kesenangan semata","Memperpanjang umur mereka sendiri","Menghukum penjahat","Melayani Dewa Kematian"], ans: 1, cat: "Death Note", diff: "Hard" },
+  { q: "Di Steins;Gate 0, Okabe berusaha menyelamatkan rekaman AI bernama?", options: ["Amadeus Kurisu","Beta Kurisu","Mayuri Kurisu","Gamma Kurisu"], ans: 0, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Di Naruto Boruto, nama Otsutsuki yang pertama kali mengancam Bumi dalam era Boruto adalah?", options: ["Momoshiki","Kinshiki","Isshiki","Urashiki"], ans: 0, cat: "Naruto", diff: "Hard" },
+  { q: "Di One Piece, Gorosei (Five Elders) adalah bagian dari?", options: ["Marine","World Government","Cipher Pol","Revolutionaries"], ans: 1, cat: "One Piece", diff: "Hard" },
+  { q: "Di AoT, Marleyan soldier yang memiliki Jaw Titan saat awal cerita bernama?", options: ["Bertholdt","Ymir","Porco Galliard","Marcel Galliard"], ans: 3, cat: "AoT", diff: "Hard" },
+  { q: "Di JoJo Part 6, Stone Ocean, nama protagonist adalah?", options: ["Jolyne Cujoh","Giorno Giovanna","Gyro Zeppeli","Johnny Joestar"], ans: 0, cat: "JoJo", diff: "Hard" },
+
+  // ===== MEDIUM TAMBAHAN =====
+  { q: "Di Demon Slayer, Insect Hashira adalah?", options: ["Kanae Kocho","Kanao Tsuyuri","Shinobu Kocho","Aoi Kanzaki"], ans: 2, cat: "Kimetsu", diff: "Medium" },
+  { q: "Di JJK, teknik kutukan bawaan Nobara Kugisaki adalah?", options: ["Black Flash","Straw Doll Technique","Divergent Fist","Boogie Woogie"], ans: 1, cat: "JJK", diff: "Medium" },
+  { q: "Di Haikyuu, Fukurodani Volleyball Club memiliki ace bernama?", options: ["Keiji Akaashi","Tetsuro Kuroo","Koutaro Bokuto","Kenma Kozume"], ans: 2, cat: "Sports", diff: "Medium" },
+  { q: "Di Bleach, 13 Court Guard Squads dipimpin oleh Genryusai Shigekuni Yamamoto sebagai?", options: ["Captain Commander","Head Captain","Grand General","Chief Admiral"], ans: 0, cat: "Bleach", diff: "Medium" },
+  { q: "Di One Piece, buah iblis Robin (Hana Hana no Mi) memberikan kemampuan apa?", options: ["Tumbuhkan bunga","Menggandakan anggota tubuh","Menjadi bunga","Mengontrol tanaman"], ans: 1, cat: "One Piece", diff: "Medium" },
+  { q: "Di Hunter x Hunter, teknik Killua untuk mengalirkan listrik ke seluruh tubuh bernama?", options: ["Whirlwind","Thunderbolt","Godspeed","Lightning Palm"], ans: 2, cat: "HxH", diff: "Medium" },
+  { q: "Di Naruto, klan Hyuga memiliki kekkei genkai bernama?", options: ["Sharingan","Rinnegan","Byakugan","Tenseigan"], ans: 2, cat: "Naruto", diff: "Medium" },
+  { q: "Di My Hero Academia, Todoroki Shoto memiliki Quirk yang merupakan gabungan dari?", options: ["Api dan angin","Es dan api","Air dan petir","Bumi dan api"], ans: 1, cat: "MHA", diff: "Medium" },
+  { q: "Di FMA Brotherhood, Bradley adalah presiden negara Amestris sekaligus Homunculus bernama?", options: ["Envy","Greed","Wrath","Pride"], ans: 2, cat: "FMA", diff: "Medium" },
+  { q: "Di Attack on Titan, Beast Titan dimiliki oleh?", options: ["Bertholdt Hoover","Zeke Yeager","Reiner Braun","Pieck Finger"], ans: 1, cat: "AoT", diff: "Medium" },
+  { q: "Di Demon Slayer, teknik Zenitsu yang paling ikonik bernama?", options: ["Thunderclap and Flash","Godspeed","Thunder Breath: First Form","Lightning of the Gods"], ans: 0, cat: "Kimetsu", diff: "Medium" },
+  { q: "Di Black Clover, Yami Sukehiro adalah captain dari Black Bull yang menggunakan sihir?", options: ["Light Magic","Dark Magic","Shadow Magic","Void Magic"], ans: 1, cat: "Magic", diff: "Medium" },
+  { q: "Di Re:Zero, Beatrice adalah spirit yang menjaga perpustakaan bernama?", options: ["Forbidden Library","Forbidden Zone","Witch's Lair","Spirit Sanctuary"], ans: 0, cat: "Isekai", diff: "Medium" },
+  { q: "Di Jujutsu Kaisen, siapa yang dikenal sebagai 'The Disgraced One' atau Toji Fushiguro?", options: ["Ayah Megumi yang menjual anaknya ke Zenin","Kakak Nobara yang mati muda","Mantan guru Gojo","Sorcerer yang berkhianat"], ans: 0, cat: "JJK", diff: "Medium" },
+  { q: "Di Fairy Tail, Erza Scarlet menggunakan sihir?", options: ["Celestial Spirit","Requip","Iron Dragon Slayer","Sky God Slayer"], ans: 1, cat: "Fairy Tail", diff: "Medium" },
+  { q: "Di One Punch Man, nama organisasi pahlawan resmi bernama?", options: ["Hero Federation","Hero Association","Hero Bureau","Hero Alliance"], ans: 1, cat: "Action", diff: "Medium" },
+  { q: "Di Code Geass, kekuatan Geass milik C.C. yang diberikan pada Lelouch adalah?", options: ["Sama seperti Lelouch","Keabadian","Membaca kenangan","Geass itu sendiri"], ans: 1, cat: "Code Geass", diff: "Medium" },
+  { q: "Di Death Note, berapa hari batas penggunaan shinigami eyes setelah Ryuk memberinya?", options: ["Seumur hidup dibagi 2","30 hari","100 hari","Tidak ada batas"], ans: 0, cat: "Death Note", diff: "Medium" },
+  { q: "Di Tokyo Ghoul, kakugan adalah perubahan pada bagian tubuh mana milik ghoul?", options: ["Tangan","Gigi","Mata","Kuku"], ans: 2, cat: "Dark", diff: "Medium" },
+  { q: "Di Overlord, Floor Guardian ke-3, Shalltear Bloodfallen adalah?", options: ["Dragon","True Vampire","Lich","Arch Devil"], ans: 1, cat: "Isekai", diff: "Medium" },
+  { q: "Di SAO, nama sistem pertarungan di Aincrad yang hanya menggunakan tangan disebut?", options: ["Martial Arts","Hand-to-Hand Combat","Extra Skill","Original Sword Skill"], ans: 0, cat: "SAO", diff: "Medium" },
+  { q: "Di Haikyuu, teknik serve Kageyama yang susah diterima karena bola bergerak tak terduga bernama?", options: ["Jump Float Serve","Ceiling Serve","Jump Serve","Sky Hook"], ans: 0, cat: "Sports", diff: "Medium" },
+  { q: "Di Dragon Ball Super, Universe 7 wakil dewa destruksinya adalah?", options: ["Champa","Beerus","Mosco","Sidra"], ans: 1, cat: "Action", diff: "Medium" },
+  { q: "Di Naruto, teknik yang Minato gunakan untuk teleportasi instan bernama?", options: ["Shadow Clone Jutsu","Flying Thunder God","Body Flicker","Kamui"], ans: 1, cat: "Naruto", diff: "Medium" },
+  { q: "Di JoJo Part 3, Stand bernama 'The World' milik siapa?", options: ["Jotaro Kujo","DIO","Yoshikage Kira","Giorno"], ans: 1, cat: "JoJo", diff: "Medium" },
+  { q: "Di Bleach, Grimmjow Jaegerjaquez adalah Espada nomor berapa?", options: ["5","6","7","8"], ans: 1, cat: "Bleach", diff: "Medium" },
+  { q: "Di My Hero Academia, Mirio Togata memiliki Quirk?", options: ["Hardening","Permeation","Rewind","Erasure"], ans: 1, cat: "MHA", diff: "Medium" },
+  { q: "Di FMA, Greed yang bersama Ling Yao menggunakan kemampuan untuk?", options: ["Mengubah kulit menjadi karbon (armor)","Meregenerasi dengan cepat","Menyerap jiwa orang lain","Mengontrol bayangan"], ans: 0, cat: "FMA", diff: "Medium" },
+  { q: "Di AoT, Reiner Braun memegang Titan shifter yang mana?", options: ["Colossal Titan","Cart Titan","Armored Titan","Jaw Titan"], ans: 2, cat: "AoT", diff: "Medium" },
+  { q: "Di Re:Zero season 2, musuh besar arc pertama adalah?", options: ["Roswaal L. Mathers","Garfiel Tinsel","Elsa Granhiert","Lye Batenkaitos"], ans: 1, cat: "Isekai", diff: "Medium" },
+
+  // ===== HARD TAMBAHAN =====
+  { q: "Di Naruto, Pain (Nagato) menggunakan berapa bodies dalam Six Paths of Pain?", options: ["5","6","7","9"], ans: 1, cat: "Naruto", diff: "Hard" },
+  { q: "Di One Piece, devil fruit type apa yang memiliki kemampuan paling tinggi menurut World Government?", options: ["Paramecia","Logia","Zoan Mythical","Ancient Zoan"], ans: 2, cat: "One Piece", diff: "Hard" },
+  { q: "Di Jujutsu Kaisen, Gojo lahir pada?", options: ["7 Desember 1989","7 Desember 1992","7 November 1989","7 Oktober 1995"], ans: 0, cat: "JJK", diff: "Hard" },
+  { q: "Di HxH, Meruem lahir prematur setelah berapa hari?", options: ["40 hari","42 hari","44 hari","46 hari"], ans: 1, cat: "HxH", diff: "Hard" },
+  { q: "Di AoT, nama operasi untuk merebut kembali Wall Maria adalah?", options: ["Operation Trost","Wall Maria Reclamation Expedition","Operation Uprising","The Final Battle"], ans: 1, cat: "AoT", diff: "Hard" },
+  { q: "Di Bleach, nama zanpakuto Captain Kenpachi Zaraki adalah?", options: ["Kenpachi","Nozarashi","Minazuki","Senbonzakura"], ans: 1, cat: "Bleach", diff: "Hard" },
+  { q: "Di FMA Brotherhood, nama kota di mana Ishval Massacre terjadi adalah?", options: ["Ishval/Ishbal","Xerxes","Creta","Xing"], ans: 0, cat: "FMA", diff: "Hard" },
+  { q: "Di Demon Slayer, Muzan Kibutsuji dapat dibunuh dengan cara apa?", options: ["Dipotong kepalanya","Terkena sinar matahari atau Nichirin blade merah membara","Wisteria poison dalam jumlah besar","Keduanya A dan C"], ans: 1, cat: "Kimetsu", diff: "Hard" },
+  { q: "Di Re:Zero, ada berapa jumlah Witch Factor (Authority of Witches)?", options: ["6","7","8","9"], ans: 2, cat: "Isekai", diff: "Hard" },
+  { q: "Di JoJo Part 7, Steel Ball Run, nama presiden Amerika antagonis adalah?", options: ["Valentine","Sandman","Sugar Mountain","Funny"], ans: 0, cat: "JoJo", diff: "Hard" },
+  { q: "Di Death Note, siapa detektif ke-3 setelah L dan Near yang bekerja melawan Kira?", options: ["Mello","Matt","Mikami","Ide"], ans: 0, cat: "Death Note", diff: "Hard" },
+  { q: "Di Overlord, Demiurge adalah Floor Guardian ke berapa di Nazarick?", options: ["5","6","7","8"], ans: 2, cat: "Isekai", diff: "Hard" },
+  { q: "Di Naruto, siapa yang pertama kali menggunakan Rinnegan setelah Rikudo Sennin (Sage of Six Paths)?", options: ["Nagato","Madara Uchiha","Obito","Sasuke"], ans: 1, cat: "Naruto", diff: "Hard" },
+  { q: "Di Haikyuu, Karasuno bertanding di Nationals di musim keberapa dalam anime?", options: ["Musim 2","Musim 3","Musim 4","Musim 5"], ans: 2, cat: "Sports", diff: "Hard" },
+  { q: "Di My Hero Academia, nama villain dengan Quirk 'Decay' (Houkai) adalah?", options: ["All For One","Overhaul","Tomura Shigaraki","Dabi"], ans: 2, cat: "MHA", diff: "Hard" },
+  { q: "Di Code Geass, berapa jumlah Knightmare Frames yang dimiliki Black Knights saat awal pemberontakan?", options: ["5 Guren","Hanya Lancelot","Lebih dari 100","7 unit"], ans: 0, cat: "Code Geass", diff: "Hard" },
+  { q: "Di Fairy Tail, Dragon Cry adalah film Fairy Tail yang memperkenalkan artefak bernama?", options: ["Dragon Slayer Sword","Dragon Cry Staff","Dragon Heart Crystal","Dragon Tear"], ans: 1, cat: "Fairy Tail", diff: "Hard" },
+  { q: "Di SAO, durasi game SAO season 1 yang nyata di dunia luar adalah?", options: ["1 bulan","6 bulan","2 tahun","3 tahun"], ans: 2, cat: "SAO", diff: "Hard" },
+  { q: "Di Tokyo Ghoul, nama ghoul yang memiliki kakuhou yang dipanen untuk membuat quinque Rize adalah?", options: ["Rize Kamishiro","Jason","Noro","Roma Hoito"], ans: 0, cat: "Dark", diff: "Hard" },
+  { q: "Di JJK, Cursed Spirit Manipulation (CSM) adalah teknik warisan Zenin clan yang dimiliki?", options: ["Kento Nanami","Suguru Geto","Masamichi Yaga","Mei Mei"], ans: 1, cat: "JJK", diff: "Hard" },
+  { q: "Di Black Clover, senjata rahasia William Vangeance yang berkaitan dengan Licht adalah?", options: ["World Tree Magic","Compound Magic","Dark Cloaked techniques","Tree of Qliphoth"], ans: 0, cat: "Magic", diff: "Hard" },
+  { q: "Di One Piece, berapa tahun lagi sebelum Poseidon, Pluto, dan Uranus bisa digunakan bersama menurut prediksi?", options: ["Sudah bisa digunakan","Teori 100 tahun","25 tahun","Tidak diketahui"], ans: 3, cat: "One Piece", diff: "Hard" },
+  { q: "Di Steins;Gate, jumlah D-mail yang Okabe kirim sebelum sadar akibatnya adalah?", options: ["3","4","5","6"], ans: 2, cat: "Sci-Fi", diff: "Hard" },
+  { q: "Di HxH, Phantom Troupe (Genei Ryodan) memiliki berapa anggota total termasuk leader?", options: ["10","11","12","13"], ans: 3, cat: "HxH", diff: "Hard" },
+  { q: "Di Bleach arc TYBW, Ichigo menggunakan teknik gabungan antara Quincy, Shinigami, dan Fullbring yang disebut?", options: ["Mugetsu","True Bankai","Saigo no Getsuga Tensho","Merged Final Form"], ans: 1, cat: "Bleach", diff: "Hard" },
+  { q: "Di Demon Slayer, Upper Moon 1 bernama?", options: ["Kokushibo","Doma","Akaza","Gyokko"], ans: 0, cat: "Kimetsu", diff: "Hard" },
+  { q: "Di Re:Zero, nama Archbishop of Gluttony yang memakan ingatan dan nama orang adalah?", options: ["Roy Alphard","Louis Arneb","Lye Batenkaitos","Semua benar"], ans: 3, cat: "Isekai", diff: "Hard" },
+  { q: "Di AoT, nama pemegang War Hammer Titan yang pertama kali muncul melawan Eren adalah?", options: ["Lara Tybur","Willy Tybur","Theo Magath","Porco Galliard"], ans: 0, cat: "AoT", diff: "Hard" },
+  { q: "Di Naruto, nama teknik yang Sasuke gunakan untuk mengorbankan matanya demi Eternal Mangekyou Sharingan adalah?", options: ["Izanami","Izanagi","Enton Amaterasu","Susano'o"], ans: 0, cat: "Naruto", diff: "Hard" },
+  { q: "Di JoJo Part 2, Stone Mask yang membuat Dio menjadi vampir berasal dari peradaban mana?", options: ["Aztec","Maya","Inca","Egyptian"], ans: 0, cat: "JoJo", diff: "Hard" },
+
+  // ===== OPENING ANIME (MEDIUM) =====
+  { q: "Lagu opening pertama Naruto (Shonen-hen) berjudul?", options: ["Rocks","GO!!!","Haruka Kanata","Hero's Come Back"], ans: 1, cat: "Opening", diff: "Medium" },
+  { q: "Lagu opening ikonik Attack on Titan season 1 berjudul?", options: ["Shinzou wo Sasageyo","My War","Jiyuu no Tsubasa","Guren no Yumiya"], ans: 3, cat: "Opening", diff: "Medium" },
+  { q: "Opening Demon Slayer season 1 yang viral berjudul?", options: ["Kamado Tanjiro no Uta","Gurenge","Akeboshi","Zankyosanka"], ans: 1, cat: "Opening", diff: "Medium" },
+  { q: "'Unravel' adalah opening dari anime?", options: ["Sword Art Online","Tokyo Ghoul","Bleach","Death Note"], ans: 1, cat: "Opening", diff: "Medium" },
+  { q: "Lagu opening Hunter x Hunter 2011 yang pertama berjudul?", options: ["Departure!","Just Awake","Reason","Ohayou"], ans: 0, cat: "Opening", diff: "Medium" },
+  { q: "'Silhouette' oleh Kana-Boon adalah opening dari anime?", options: ["Bleach","Naruto Shippuden","One Piece","Fairy Tail"], ans: 1, cat: "Opening", diff: "Medium" },
+  { q: "Opening anime 'Fullmetal Alchemist Brotherhood' yang paling dikenal fans (OP4) berjudul?", options: ["Again","Period","Golden Time Lover","Hologram"], ans: 0, cat: "Opening", diff: "Medium" },
+  { q: "'Guren no Yumiya' dinyanyikan oleh band?", options: ["Flow","Linked Horizon","Kalafina","LiSA"], ans: 1, cat: "Opening", diff: "Medium" },
+  { q: "Opening One Piece yang paling panjang diputar (OP1) berjudul?", options: ["We Are!","We Go!","Hands Up!","Brand New World"], ans: 0, cat: "Opening", diff: "Medium" },
+  { q: "'Gurenge' dinyanyikan oleh siapa?", options: ["Aimer","LiSA","Yoko Takahashi","Eir Aoi"], ans: 1, cat: "Opening", diff: "Medium" },
+  { q: "Opening Jujutsu Kaisen season 1 yang viral berjudul?", options: ["Lost in Paradise","Vivid Vice","Kaikai Kitan","Ao no Sumika"], ans: 2, cat: "Opening", diff: "Medium" },
+  { q: "Opening My Hero Academia musim 1 berjudul?", options: ["The Day","Peace Sign","Sora ni Utaeba","Odd Future"], ans: 0, cat: "Opening", diff: "Medium" },
+  { q: "'Crossing Field' adalah opening dari?", options: ["Sword Art Online season 1","SAO Alicization","SAO GGO","SAO Season 2"], ans: 0, cat: "Opening", diff: "Medium" },
+  { q: "Opening Bleach yang pertama berjudul?", options: ["Asterisk","D-tecnoLife","Ichirin no Hana","Tonight, Tonight, Tonight"], ans: 0, cat: "Opening", diff: "Medium" },
+  { q: "Band yang menyanyikan opening Naruto 'GO!!!' adalah?", options: ["FLOW","NICO Touches the Walls","Asian Kung-Fu Generation","Orange Range"], ans: 0, cat: "Opening", diff: "Medium" },
+
+  // ===== OPENING ANIME (HARD) =====
+  { q: "Opening Attack on Titan season 3 part 2 'Shingeki no Kyojin' berjudul?", options: ["Shinzou wo Sasageyo","My War","Shoukei to Shikabane no Michi","Attack on Titan"], ans: 2, cat: "Opening", diff: "Hard" },
+  { q: "Opening Naruto Shippuden episode 1-30 berjudul?", options: ["Haruka Kanata","Hero's Come Back","Distance","Blue Bird"], ans: 2, cat: "Opening", diff: "Hard" },
+  { q: "'Kaikai Kitan' dinyanyikan oleh artist bernama?", options: ["Kenshi Yonezu","Eve","Aimer","Ado"], ans: 1, cat: "Opening", diff: "Hard" },
+  { q: "Opening Hunter x Hunter 2011 yang ke-2 berjudul?", options: ["Departure!","Fly High","Taiyou wa Shizumanai","Greed Island"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Opening Bleach: Thousand Year Blood War berjudul?", options: ["Saihate","STARS","Rapport","one:"],  ans: 3, cat: "Opening", diff: "Hard" },
+  { q: "'Blue Bird' opening Naruto Shippuden episode berapa?", options: ["Ep 53-77","Ep 78-102","Ep 54-103","Ep 30-53"], ans: 1, cat: "Opening", diff: "Hard" },
+  { q: "Opening Demon Slayer Mugen Train Arc berjudul?", options: ["Akeboshi","Zankyosanka","Shirogane","Asa ga Kuru"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Band FLOW menyanyikan opening 'DAYS' untuk anime apa?", options: ["Eureka Seven","Naruto","Code Geass","Fullmetal Alchemist"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Opening Re:Zero season 2 part 1 berjudul?", options: ["Redo","Realized","Stay Alive","Wishing"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Opening Jujutsu Kaisen Season 2 (Shibuya Incident arc) berjudul?", options: ["Ao no Sumika","Specialz","Jiyuu","Lost in Paradise"], ans: 1, cat: "Opening", diff: "Hard" },
+  { q: "'Again' opening FMA Brotherhood dinyanyikan oleh?", options: ["Yui","Nico Touches the Walls","SID","UVERworld"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Opening One Piece 'We Are!' dinyanyikan siapa?", options: ["Hiroshi Kitadani","Kohei Tanaka","Avex Trax","Mayumi Kojima"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Opening Death Note season 1 berjudul?", options: ["What's Up People?!","The World","Alumina","Zetsu"], ans: 1, cat: "Opening", diff: "Hard" },
+  { q: "Opening Fairy Tail yang paling terkenal berjudul?", options: ["Snow Fairy","Fiesta","Sense of Wonder","Eternal Fellows"], ans: 0, cat: "Opening", diff: "Hard" },
+  { q: "Opening Code Geass R2 yang ikonik berjudul?", options: ["Colors","O2","World's End","Continued Story"], ans: 1, cat: "Opening", diff: "Hard" },
+
+  // ===== EASY TAMBAHAN (110+ soal baru) =====
+  // --- Dragon Ball ---
+  { q: "Di Dragon Ball Z, siapa ayah kandung Goku?", options: ["Bardock","King Vegeta","Raditz","Nappa"], ans: 0, cat: "Action", diff: "Easy" },
+  { q: "Di Dragon Ball, nama rival Goku sejak kecil yang juga Saiyan adalah?", options: ["Gohan","Vegeta","Piccolo","Trunks"], ans: 1, cat: "Action", diff: "Easy" },
+  { q: "Di Dragon Ball Z, fusion antara Goku dan Vegeta menggunakan Potara Earring menghasilkan karakter bernama?", options: ["Gogeta","Vegito","Gotenks","Gohan"], ans: 1, cat: "Action", diff: "Easy" },
+  { q: "Di Dragon Ball Super, nama tournament yang melibatkan semua universe bernama?", options: ["World Martial Arts Tournament","Tournament of Power","God Tournament","Zeno Cup"], ans: 1, cat: "Action", diff: "Easy" },
+  { q: "Di Dragon Ball Z, siapa yang membunuh Frieza pertama kali?", options: ["Goku","Gohan","Future Trunks","Vegeta"], ans: 2, cat: "Action", diff: "Easy" },
+
+  // --- One Piece lanjutan ---
+  { q: "Di One Piece, dokter kapal Mugiwara adalah?", options: ["Usopp","Franky","Tony Tony Chopper","Brook"], ans: 2, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, siapa arkeolog kapal Mugiwara?", options: ["Nami","Robin","Vivi","Hancock"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, Shanks adalah kapten dari kelompok bajak laut bernama?", options: ["Whitebeard Pirates","Red Hair Pirates","Roger Pirates","Blackbeard Pirates"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, nama kapal pertama Mugiwara Pirates adalah?", options: ["Thousand Sunny","Going Merry","Red Force","Moby Dick"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, Marine terkuat dengan gelar Admiral yang memiliki kemampuan magma adalah?", options: ["Kizaru","Aokiji","Akainu","Fujitora"], ans: 2, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, Usopp adalah anggota ke berapa yang bergabung dengan Mugiwara?", options: ["3","4","5","6"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, nama pulau tempat Luffy tumbuh besar adalah?", options: ["Dawn Island","Foosha Village","Orange Town","Shell Town"], ans: 0, cat: "One Piece", diff: "Easy" },
+  { q: "Di One Piece, Brook adalah musisi kapal yang merupakan sosok?", options: ["Mermaid","Ghost","Living Skeleton","Zombie"], ans: 2, cat: "One Piece", diff: "Easy" },
+
+  // --- Naruto lanjutan ---
+  { q: "Di Naruto, nama guru tim 7 adalah?", options: ["Iruka Umino","Kakashi Hatake","Asuma Sarutobi","Kurenai Yuhi"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, siapa anggota tim 7 selain Naruto dan Sakura?", options: ["Neji","Rock Lee","Sasuke Uchiha","Kiba"], ans: 2, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, nama Hokage pertama adalah?", options: ["Tobirama Senju","Hashirama Senju","Hiruzen Sarutobi","Minato Namikaze"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, teknik kloning bayangan Naruto disebut?", options: ["Multi Shadow Clone Jutsu","Rasengan","Body Replacement","Substitution Jutsu"], ans: 0, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, Kakashi dikenal dengan julukan?", options: ["Yellow Flash","Copy Ninja","Silent Killer","Red-Hot Habanero"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, hewan peliharaan Kakashi bernama?", options: ["Akamaru","Pakkun","Gamabunta","Katsuyu"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, summon toad raksasa milik Naruto bernama?", options: ["Gamabunta","Katsuyu","Manda","Enma"], ans: 0, cat: "Naruto", diff: "Easy" },
+  { q: "Di Naruto, Rock Lee tidak bisa menggunakan apa?", options: ["Taijutsu","Ninjutsu/Genjutsu","Physical strength","Speed"], ans: 1, cat: "Naruto", diff: "Easy" },
+
+  // --- Attack on Titan ---
+  { q: "Di Attack on Titan, tembok terluar yang pertama kali ditembus Titan bernama?", options: ["Wall Maria","Wall Rose","Wall Sina","Wall Paradis"], ans: 0, cat: "AoT", diff: "Easy" },
+  { q: "Di Attack on Titan, nama pasukan yang bertugas menjaga kota (di dalam tembok) bernama?", options: ["Survey Corps","Military Police","Garrison","Scout Regiment"], ans: 2, cat: "AoT", diff: "Easy" },
+  { q: "Di Attack on Titan, sahabat Eren sejak kecil selain Mikasa adalah?", options: ["Jean","Connie","Armin Arlert","Sasha"], ans: 2, cat: "AoT", diff: "Easy" },
+  { q: "Di Attack on Titan, Sasha Blouse terkenal karena menyukai?", options: ["Daging/Makanan","Kuda","Buku","Senjata"], ans: 0, cat: "AoT", diff: "Easy" },
+  { q: "Di Attack on Titan, Colossal Titan dimiliki oleh siapa pada awal cerita?", options: ["Reiner Braun","Bertholdt Hoover","Eren Yeager","Zeke Yeager"], ans: 1, cat: "AoT", diff: "Easy" },
+
+  // --- Demon Slayer ---
+  { q: "Di Demon Slayer, organisasi pemburu iblis bernama?", options: ["Demon Slayer Corps","Hashira Council","Wisteria Order","Sun Breathing Guild"], ans: 0, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Demon Slayer, Inosuke Hashibira selalu memakai topeng apa?", options: ["Tengkorak","Babi Hutan","Serigala","Harimau"], ans: 1, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Demon Slayer, Zenitsu Agatsuma menggunakan breathing style apa?", options: ["Water Breathing","Thunder Breathing","Wind Breathing","Stone Breathing"], ans: 1, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Demon Slayer, musuh utama yang menciptakan semua iblis bernama?", options: ["Muzan Kibutsuji","Kokushibo","Doma","Akaza"], ans: 0, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Demon Slayer, wisteria (藤) adalah tanaman yang?", options: ["Memperkuat iblis","Beracun bagi iblis","Menyembuhkan manusia","Sumber kekuatan Hashira"], ans: 1, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Demon Slayer, nichirin blade milik Tanjiro berwarna?", options: ["Merah","Hitam","Biru","Hijau"], ans: 1, cat: "Kimetsu", diff: "Easy" },
+
+  // --- My Hero Academia ---
+  { q: "Di My Hero Academia, nama sekolah hero yang Izuku masuki adalah?", options: ["Shiketsu High","Ketsubutsu Academy","UA High School","Seiai Academy"], ans: 2, cat: "MHA", diff: "Easy" },
+  { q: "Di My Hero Academia, Quirk Izuku Midoriya setelah menerima warisan adalah?", options: ["All For One","One For All","Explosion","Half-Cold Half-Hot"], ans: 1, cat: "MHA", diff: "Easy" },
+  { q: "Di My Hero Academia, hero nomor 1 setelah All Might pensiun adalah?", options: ["Hawks","Best Jeanist","Endeavor","Mirko"], ans: 2, cat: "MHA", diff: "Easy" },
+  { q: "Di My Hero Academia, nama villain yang memiliki decay touch adalah?", options: ["Dabi","Toga","Shigaraki","Mr. Compress"], ans: 2, cat: "MHA", diff: "Easy" },
+  { q: "Di My Hero Academia, Ochaco Uraraka memiliki Quirk?", options: ["Copy","Zero Gravity","Invisible","Sugar Rush"], ans: 1, cat: "MHA", diff: "Easy" },
+  { q: "Di My Hero Academia, kelas yang Izuku masuki di UA adalah?", options: ["Class 1-A","Class 1-B","Class 2-A","Hero Course A"], ans: 0, cat: "MHA", diff: "Easy" },
+
+  // --- Jujutsu Kaisen ---
+  { q: "Di Jujutsu Kaisen, Yuji Itadori memiliki fisik luar biasa dan dijuluki?", options: ["Iron Body","Divergent Fist","Tiger of Sendai","Monster"], ans: 2, cat: "JJK", diff: "Easy" },
+  { q: "Di Jujutsu Kaisen, Nobara Kugisaki menggunakan senjata apa?", options: ["Pedang","Palu dan paku","Tombak","Busur dan panah"], ans: 1, cat: "JJK", diff: "Easy" },
+  { q: "Di Jujutsu Kaisen, anime ini diproduksi oleh studio?", options: ["Bones","Madhouse","MAPPA","Ufotable"], ans: 2, cat: "JJK", diff: "Easy" },
+  { q: "Di Jujutsu Kaisen, kutukan (cursed spirit) lahir dari?", options: ["Darah manusia","Emosi negatif manusia","Ritual kuno","Alam gaib"], ans: 1, cat: "JJK", diff: "Easy" },
+  { q: "Di Jujutsu Kaisen, Megumi Fushiguro memanggil shikigami menggunakan teknik?", options: ["Limitless","Ten Shadows Technique","Straw Doll Technique","Idle Transfiguration"], ans: 1, cat: "JJK", diff: "Easy" },
+
+  // --- Hunter x Hunter ---
+  { q: "Di Hunter x Hunter, Gon Freecss mencari ayahnya yang bernama?", options: ["Ging Freecss","Isaac Netero","Leorio","Silva Zoldyck"], ans: 0, cat: "HxH", diff: "Easy" },
+  { q: "Di Hunter x Hunter, Killua berasal dari keluarga?", options: ["Freecss","Zoldyck","Nostrade","Lucilfer"], ans: 1, cat: "HxH", diff: "Easy" },
+  { q: "Di Hunter x Hunter, untuk menjadi Hunter harus lulus ujian yang sangat sulit bernama?", options: ["Hunter Exam","Nen Test","Zoldyck Trial","Celestial Tower"], ans: 0, cat: "HxH", diff: "Easy" },
+  { q: "Di Hunter x Hunter, Leorio bercita-cita menjadi?", options: ["Hunter","Dokter","Pengacara","Pedagang"], ans: 1, cat: "HxH", diff: "Easy" },
+  { q: "Di Hunter x Hunter, Kurapika adalah survivor dari klan?", options: ["Zoldyck","Kurta","Nostrade","Kakin"], ans: 1, cat: "HxH", diff: "Easy" },
+
+  // --- Bleach ---
+  { q: "Di Bleach, Soul Society adalah dunia tempat tinggal?", options: ["Hollow","Shinigami","Quincy","Fullbring"], ans: 1, cat: "Bleach", diff: "Easy" },
+  { q: "Di Bleach, Hollow adalah?", options: ["Shinigami jahat","Jiwa manusia yang rusak","Quincy hitam","Roh binatang"], ans: 1, cat: "Bleach", diff: "Easy" },
+  { q: "Di Bleach, sahabat dekat Ichigo yang juga Quincy adalah?", options: ["Orihime Inoue","Chad","Uryu Ishida","Rukia Kuchiki"], ans: 2, cat: "Bleach", diff: "Easy" },
+  { q: "Di Bleach, Rukia Kuchiki berasal dari squad (division) ke berapa?", options: ["Squad 6","Squad 13","Squad 4","Squad 11"], ans: 1, cat: "Bleach", diff: "Easy" },
+  { q: "Di Bleach, kemampuan pertahanan/penyembuhan Orihime Inoue disebut?", options: ["Shunpo","Santen Kesshun","Getsuga Tensho","Hierro"], ans: 1, cat: "Bleach", diff: "Easy" },
+
+  // --- Fairy Tail ---
+  { q: "Di Fairy Tail, master guild Fairy Tail yang berkumis putih bernama?", options: ["Gildarts","Makarov Dreyar","Laxus","Erza"], ans: 1, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di Fairy Tail, Natsu Dragneel adalah Dragon Slayer tipe apa?", options: ["Iron","Sky","Fire","Lightning"], ans: 2, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di Fairy Tail, Lucy Heartfilia menggunakan magic?", options: ["Ice Make","Celestial Spirit","Requip","Fire Dragon Slayer"], ans: 1, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di Fairy Tail, Gray Fullbuster menggunakan magic?", options: ["Ice Make","Fire Make","Water Make","Wind Make"], ans: 0, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di Fairy Tail, Happy adalah makhluk apa?", options: ["Kucing biasa","Exceed (kucing bersayap)","Dragon kecil","Peri"], ans: 1, cat: "Fairy Tail", diff: "Easy" },
+
+  // --- Fullmetal Alchemist ---
+  { q: "Di FMA Brotherhood, adik Edward Elric yang tubuhnya menjadi armor bernama?", options: ["Alphonse Elric","Roy Mustang","Alex Armstrong","Envy"], ans: 0, cat: "FMA", diff: "Easy" },
+  { q: "Di FMA Brotherhood, Roy Mustang dijuluki?", options: ["Iron Fist","Flame Alchemist","Strong Arm","Crimson Lotus"], ans: 1, cat: "FMA", diff: "Easy" },
+  { q: "Di FMA Brotherhood, ibukota negara Amestris bernama?", options: ["Resembool","Dublith","Central City","Ishval"], ans: 2, cat: "FMA", diff: "Easy" },
+  { q: "Di FMA, Ed dan Al melakukan alkimia terlarang untuk mencoba menghidupkan kembali?", options: ["Ayah mereka","Ibu mereka","Kakak mereka","Guru mereka"], ans: 1, cat: "FMA", diff: "Easy" },
+  { q: "Di FMA Brotherhood, Winry Rockbell adalah ahli?", options: ["Alkimia","Senjata api","Automail (lengan/kaki mekanik)","Pertambangan"], ans: 2, cat: "FMA", diff: "Easy" },
+
+  // --- Isekai & SAO ---
+  { q: "Di Sword Art Online, nama lengkap Kirito di dunia nyata adalah?", options: ["Kirigaya Kazuto","Kirigaya Suguha","Asuna Yuuki","Klein"], ans: 0, cat: "SAO", diff: "Easy" },
+  { q: "Di Re:Zero, Subaru datang ke dunia lain dari?", options: ["Mimpi","Convenience store/minimarket","Portal ajaib","Buku kuno"], ans: 1, cat: "Isekai", diff: "Easy" },
+  { q: "Di Overlord, nama karakter utama yang masuk ke dunia game adalah?", options: ["Kirito","Ainz Ooal Gown/Momonga","Subaru","Bell Cranel"], ans: 1, cat: "Isekai", diff: "Easy" },
+  { q: "Di Konosuba, goddess yang menemani Kazuma bernama?", options: ["Emilia","Rem","Aqua","Eris"], ans: 2, cat: "Isekai", diff: "Easy" },
+  { q: "Di Sword Art Online, Asuna adalah wakil guild dari?", options: ["Black Cats","Knights of the Blood","Aincrad Liberation Force","Divine Dragon Alliance"], ans: 1, cat: "SAO", diff: "Easy" },
+  { q: "Di anime 'That Time I Got Reincarnated as a Slime', karakter utama bereinkarnasi menjadi?", options: ["Naga","Goblin","Slime","Dragon"], ans: 2, cat: "Isekai", diff: "Easy" },
+  { q: "Di Konosuba, explosion wizard yang selalu gagal bernama?", options: ["Wiz","Darkness","Megumin","Chris"], ans: 2, cat: "Isekai", diff: "Easy" },
+
+  // --- Classic & Trivia ---
+  { q: "Anime 'Cowboy Bebop' bercerita tentang?", options: ["Ninja masa depan","Bounty hunter di luar angkasa","Detektif sekolah","Samurai era modern"], ans: 1, cat: "Classic", diff: "Easy" },
+  { q: "Anime 'Fullmetal Alchemist Brotherhood' diadaptasi dari manga karya?", options: ["Hiromu Arakawa","Naoki Urasawa","Rumiko Takahashi","Akira Toriyama"], ans: 0, cat: "Classic", diff: "Easy" },
+  { q: "Studio Ghibli didirikan oleh Hayao Miyazaki bersama?", options: ["Satoshi Kon","Isao Takahata","Mamoru Hosoda","Makoto Shinkai"], ans: 1, cat: "Studio", diff: "Easy" },
+  { q: "Anime 'Slam Dunk' bercerita tentang olahraga apa?", options: ["Voli","Sepak bola","Basket","Bulu tangkis"], ans: 2, cat: "Classic", diff: "Easy" },
+  { q: "Karakter 'Spike Spiegel' berasal dari anime?", options: ["Trigun","Cowboy Bebop","Space Dandy","Outlaw Star"], ans: 1, cat: "Classic", diff: "Easy" },
+  { q: "Anime 'Doraemon' berasal dari negara?", options: ["Korea","China","Jepang","Amerika"], ans: 2, cat: "Trivia", diff: "Easy" },
+  { q: "Shonen manga biasanya ditargetkan untuk pembaca?", options: ["Anak perempuan remaja","Anak laki-laki remaja","Dewasa wanita","Dewasa pria"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Majalah manga Shonen Jump terbit setiap?", options: ["Harian","Mingguan","Bulanan","Dua mingguan"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Anime 'Inuyasha' bercerita tentang era apa di Jepang?", options: ["Modern","Feudal/Sengoku","Meiji","Edo"], ans: 1, cat: "Classic", diff: "Easy" },
+  { q: "Karakter 'Astro Boy' (Tetsuwan Atom) diciptakan oleh siapa?", options: ["Akira Toriyama","Osamu Tezuka","Go Nagai","Shotaro Ishinomori"], ans: 1, cat: "Trivia", diff: "Easy" },
+
+  // --- Miscellaneous Easy ---
+  { q: "Di Black Clover, rival Asta yang jenius sihir bernama?", options: ["Luck Voltia","Magna Swing","Yuno","Leopold Vermillion"], ans: 2, cat: "Magic", diff: "Easy" },
+  { q: "Di Tokyo Ghoul, jenis kagune yang berbentuk seperti ekor/tentakel panjang disebut?", options: ["Rinkaku","Ukaku","Koukaku","Bikaku"], ans: 0, cat: "Dark", diff: "Easy" },
+  { q: "Di Death Note, Ryuk adalah?", options: ["Manusia","Shinigami (Death God)","Demon","Ghost"], ans: 1, cat: "Death Note", diff: "Easy" },
+  { q: "Di Code Geass, latar ceritanya adalah dunia alternatif dimana kekaisaran mana yang menguasai Jepang?", options: ["Kekaisaran Romawi","Kekaisaran Britania","Kekaisaran China","Kekaisaran Ottoman"], ans: 1, cat: "Code Geass", diff: "Easy" },
+  { q: "Di Haikyuu, warna seragam tim Karasuno adalah?", options: ["Biru putih","Hitam oranye","Merah putih","Hitam putih"], ans: 1, cat: "Sports", diff: "Easy" },
+  { q: "Di One Punch Man, Saitama menjadi kuat karena?", options: ["Lahir bakat","Latihan keras selama 3 tahun","Diberi kekuatan dewa","Ritual kuno"], ans: 1, cat: "Action", diff: "Easy" },
+  { q: "Di Steins;Gate, karakter utama Rintaro Okabe menyebut dirinya sebagai?", options: ["El Psy Kongroo","Mad Scientist Hououin Kyouma","The Mastermind","Dr. Future"], ans: 1, cat: "Sci-Fi", diff: "Easy" },
+  { q: "Anime 'Sword Art Online' bersetting di tahun berapa (dunia nyata)?", options: ["2020","2022","2024","2030"], ans: 1, cat: "SAO", diff: "Easy" },
+  { q: "Di Fairy Tail, Gajeel Redfox adalah Dragon Slayer tipe apa?", options: ["Fire","Ice","Iron","Sky"], ans: 2, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di My Hero Academia, semua murid kelas 1-A memiliki impian menjadi?", options: ["Villain","Hero profesional","Polisi","Dokter"], ans: 1, cat: "MHA", diff: "Easy" },
+  { q: "Di Naruto, Sakura Haruno adalah murid dari Hokage ke-5 bernama?", options: ["Tsunade","Chiyo","Shizune","Kurenai"], ans: 0, cat: "Naruto", diff: "Easy" },
+  { q: "Di One Piece, tanda kru Mugiwara Pirates adalah?", options: ["Tengkorak bertelinga","Tengkorak dengan straw hat","Tulang bersilang","Bendera merah"], ans: 1, cat: "One Piece", diff: "Easy" },
+  { q: "Di Hunter x Hunter, Gon menggunakan kekuatan Nen dengan cara menggenggam?", options: ["Batu","Tongkat (fishing rod)","Pedang kecil","Kartu"], ans: 1, cat: "HxH", diff: "Easy" },
+  { q: "Di Bleach, Shinigami menggunakan teknik berlari cepat yang disebut?", options: ["Shunpo (Flash Step)","Sonido","Hirenkyaku","Bringer Light"], ans: 0, cat: "Bleach", diff: "Easy" },
+  { q: "Di Attack on Titan, manusia di dalam tembok tidak mengetahui dunia luar karena?", options: ["Pemerintah menyembunyikan kebenaran","Tidak ada akses komunikasi","Titan memblokir semua jalan","Mereka memilih tidak tahu"], ans: 0, cat: "AoT", diff: "Easy" },
+  { q: "Di Jujutsu Kaisen, teknik yang bisa mempercepat penyembuhan luka disebut?", options: ["Cursed Technique Reversal","Reverse Cursed Technique","Binding Vow","Simple Domain"], ans: 1, cat: "JJK", diff: "Easy" },
+  { q: "Di Re:Zero, karakter Emilia adalah half-elf yang rambutnya berwarna?", options: ["Hitam","Merah","Perak/Putih","Pirang"], ans: 2, cat: "Isekai", diff: "Easy" },
+  { q: "Anime 'No Game No Life' memiliki art style dengan dominasi warna?", options: ["Gelap dan suram","Cerah dan saturasi tinggi","Monokrom","Pastel lembut"], ans: 1, cat: "Isekai", diff: "Easy" },
+  { q: "Di FMA Brotherhood, alkimia adalah ilmu yang mengikuti hukum alam — untuk mendapatkan sesuatu harus?", options: ["Berdoa","Mengorbankan sesuatu setara nilainya","Memiliki bakat khusus","Mempelajari buku kuno"], ans: 1, cat: "FMA", diff: "Easy" },
+  { q: "Di Demon Slayer, warna baju ikonik Tanjiro adalah?", options: ["Merah dan hitam","Hijau dan hitam (motif kotak-kotak)","Biru dan putih","Kuning dan hitam"], ans: 1, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Code Geass, nama alter ego pahlawan Lelouch adalah?", options: ["Black Knight","Zero","Kallen","C.C."], ans: 1, cat: "Code Geass", diff: "Easy" },
+  { q: "Di Konosuba, Darkness adalah knight yang memiliki sifat?", options: ["Pengecut","Masochist (suka disakiti)","Sombong","Pemalu"], ans: 1, cat: "Isekai", diff: "Easy" },
+
+  // ===== MEDIUM TAMBAHAN (30+ soal baru) =====
+  { q: "Di Naruto, teknik Edo Tensei membangkitkan orang mati menggunakan tumbal?", options: ["Jiwa orang lain","Tubuh manusia hidup sebagai wadah","Darah Uchiha","Chakra tailed beast"], ans: 1, cat: "Naruto", diff: "Medium" },
+  { q: "Di One Piece, nama teknik pedang Zoro yang menggunakan tiga pedang sekaligus disebut?", options: ["Santoryu","Nitoryu","Ittoryu","Rokushiki"], ans: 0, cat: "One Piece", diff: "Medium" },
+  { q: "Di Attack on Titan, nama pasukan elit di dalam Military Police bernama?", options: ["First Interior Squad","Central Military Police","Special Operations Squad","Anti-Personnel Control Squad"], ans: 0, cat: "AoT", diff: "Medium" },
+  { q: "Di Jujutsu Kaisen, Black Flash adalah teknik yang menghantam dengan cursed energy dalam waktu?", options: ["0.000001 detik","0.1 detik","1 detik","Tidak ada waktu tertentu"], ans: 0, cat: "JJK", diff: "Medium" },
+  { q: "Di Hunter x Hunter, nama arc dimana Gon dan Killua bermain game untuk mendapat card tertentu?", options: ["Yorknew City","Greed Island","Chimera Ant","Hunter Exam"], ans: 1, cat: "HxH", diff: "Medium" },
+  { q: "Di Bleach, Vizard adalah Shinigami yang juga memiliki kekuatan?", options: ["Quincy","Hollow","Fullbring","Bount"], ans: 1, cat: "Bleach", diff: "Medium" },
+  { q: "Di FMA Brotherhood, alkimis yang menggunakan sihir darah (blood rune) tanpa perlu lingkaran transmutasi disebut memiliki kemampuan?", options: ["Alkimia tingkat dewa","Bypass equivalent exchange","Clap Alchemy","God Alchemy"], ans: 2, cat: "FMA", diff: "Medium" },
+  { q: "Di Demon Slayer, Upper Moon 2 yang memimpin sekte iblis dengan ideologi cinta bernama?", options: ["Akaza","Doma","Kokushibo","Hantengu"], ans: 1, cat: "Kimetsu", diff: "Medium" },
+  { q: "Di My Hero Academia, Provisional Hero License Exam diikuti oleh siswa kelas berapa?", options: ["Kelas 1","Kelas 2","Kelas 3","Semua kelas"], ans: 0, cat: "MHA", diff: "Medium" },
+  { q: "Di Re:Zero, Subaru mendapat julukan 'Knight of Emilia' secara resmi dari?", options: ["Emilia sendiri","Roswaal","Crusch Karsten","Anastasia Hoshin"], ans: 1, cat: "Isekai", diff: "Medium" },
+  { q: "Di SAO, nama sistem yang memungkinkan pemain merasakan sensasi fisik dalam game adalah?", options: ["NerveGear","AmuSphere","Soul Translator","FullDive"], ans: 0, cat: "SAO", diff: "Medium" },
+  { q: "Di Code Geass, Orange adalah julukan yang diberikan kepada?", options: ["Suzaku","Jeremiah Gottwald","Lloyd Asplund","Villetta Nu"], ans: 1, cat: "Code Geass", diff: "Medium" },
+  { q: "Di Tokyo Ghoul, Aogiri Tree adalah organisasi yang dipimpin oleh?", options: ["Eto Yoshimura","Tatara","Noro","Yamori"], ans: 0, cat: "Dark", diff: "Medium" },
+  { q: "Di Overlord, item yang membuat Ainz tidak bisa mati (auto-resurrection) bernama?", options: ["Staff of Ainz Ooal Gown","Shooting Star","Mantle of Chaos","Throne of Kings"], ans: 1, cat: "Isekai", diff: "Medium" },
+  { q: "Di Death Note, aturan Death Note yang menyatakan seseorang harus bisa membayangkan wajah korban disebut?", options: ["Face Rule","13 Day Rule","Visual Rule","Shinigami Law"], ans: 2, cat: "Death Note", diff: "Medium" },
+  { q: "Di Fairy Tail, Celestial Spirit King adalah raja dari semua celestial spirit yang bisa dipanggil dengan cara?", options: ["Mengorbankan spirit key terkuat","Menutup semua spirit gate sekaligus","Membayar dengan jiwa","Ritual khusus di purnama"], ans: 0, cat: "Fairy Tail", diff: "Medium" },
+  { q: "Di Black Clover, grimoire bintang empat milik Yuno memiliki kekuatan sihir?", options: ["Wind Magic","Star Magic","Spatial Magic","Light Magic"], ans: 0, cat: "Magic", diff: "Medium" },
+  { q: "Di Haikyuu, libero karasuno yang handal bernama?", options: ["Tadashi Yamaguchi","Kei Tsukishima","Yu Nishinoya","Ryunosuke Tanaka"], ans: 2, cat: "Sports", diff: "Medium" },
+  { q: "Di JoJo Part 3, Stand 'The World' milik DIO memiliki kemampuan?", options: ["Menghentikan waktu","Membalik waktu","Mempercepat waktu","Melompat dalam waktu"], ans: 0, cat: "JoJo", diff: "Medium" },
+  { q: "Di Steins;Gate, untuk mencapai Steins Gate world line (yang bahagia), Okabe harus?", options: ["Mencegah Kurisu dibunuh sekaligus menipu dirinya sendiri di masa lalu","Menghapus semua D-mail","Menghancurkan IBN 5100","Mengakui perasaannya kepada Kurisu"], ans: 0, cat: "Sci-Fi", diff: "Medium" },
+  { q: "Di Naruto, Kakashi kehilangan mata kirinya yang kemudian berubah menjadi Sharingan milik?", options: ["Sasuke","Obito Uchiha","Madara","Itachi"], ans: 1, cat: "Naruto", diff: "Medium" },
+  { q: "Di One Piece, Boa Hancock memiliki Devil Fruit yang bisa mengubah orang menjadi?", options: ["Es","Batu","Batu (Mero Mero no Mi)","Boneka"], ans: 2, cat: "One Piece", diff: "Medium" },
+  { q: "Di Bleach, bankai milik Captain Byakuya Kuchiki bernama?", options: ["Senbonzakura Kageyoshi","Daiguren Hyorinmaru","Zanka no Tachi","Kokujō Tengen Myō'ō"], ans: 0, cat: "Bleach", diff: "Medium" },
+  { q: "Di MHA, siapa villain yang memiliki kemampuan untuk mengubah wajahnya menjadi siapa saja?", options: ["Shigaraki","Toga Himiko","Dabi","Spinner"], ans: 1, cat: "MHA", diff: "Medium" },
+  { q: "Di Attack on Titan, 'The Coordinate' adalah kemampuan Founding Titan yang bisa?", options: ["Mengendalikan semua Titan","Membuat Titan baru","Menghancurkan tembok","Menghilangkan memori"], ans: 0, cat: "AoT", diff: "Medium" },
+  { q: "Di Demon Slayer, teknik napas asli yang menjadi dasar semua breathing style adalah?", options: ["Water Breathing","Sun Breathing (Hinokami Kagura)","Flame Breathing","Moon Breathing"], ans: 1, cat: "Kimetsu", diff: "Medium" },
+  { q: "Di Hunter x Hunter, kemampuan Nen yang mewujudkan sesuatu dari energi Nen disebut?", options: ["Transmutation","Conjuration","Emission","Enhancement"], ans: 1, cat: "HxH", diff: "Medium" },
+  { q: "Di JJK, nama teknik domain Sukuna yang menghancurkan semua dalam radius tertentu adalah?", options: ["Malevolent Shrine","Coffin of the Iron Mountain","Idle Death Gamble","Infinite Void"], ans: 0, cat: "JJK", diff: "Medium" },
+  { q: "Di FMA Brotherhood, Xing adalah negara di timur yang sistemnya menggunakan alkimia berbasis?", options: ["Api","Alkimia Barat biasa","Alkimia Dragon Pulse/Alkahestry","Darah"], ans: 2, cat: "FMA", diff: "Medium" },
+  { q: "Di Re:Zero season 1, arc yang paling berkesan dimana Rem mati berulang kali bernama?", options: ["Mansion Arc","Witches' Tea Party","White Whale and Sin Archbishop Arc","Return by Death Loop"], ans: 0, cat: "Isekai", diff: "Medium" },
+
+  // ===== EASY PENUTUP =====
+  { q: "Anime 'Bleach' diadaptasi dari manga karya siapa?", options: ["Masashi Kishimoto","Tite Kubo","Eiichiro Oda","Akira Toriyama"], ans: 1, cat: "Classic", diff: "Easy" },
+  { q: "Di One Piece, siapa yang memberikan topi jerami ikonik kepada Luffy?", options: ["Ace","Garp","Shanks","Whitebeard"], ans: 2, cat: "One Piece", diff: "Easy" },
+  { q: "Di Naruto, siapa Hokage ke-3 yang dijuluki 'God of Shinobi'?", options: ["Tobirama Senju","Hiruzen Sarutobi","Minato Namikaze","Tsunade"], ans: 1, cat: "Naruto", diff: "Easy" },
+  { q: "Di Attack on Titan, Armin Arlert akhirnya mewarisi Titan shifter apa?", options: ["Founding Titan","Colossal Titan","Attack Titan","Jaw Titan"], ans: 1, cat: "AoT", diff: "Easy" },
+  { q: "Anime 'Jujutsu Kaisen' diadaptasi dari manga karya?", options: ["Gege Akutami","Koyoharu Gotouge","Kohei Horikoshi","Hajime Isayama"], ans: 0, cat: "Trivia", diff: "Easy" },
+  { q: "Di My Hero Academia, kostum hero Izuku Midoriya berwarna dominan?", options: ["Merah","Biru","Hijau","Hitam"], ans: 2, cat: "MHA", diff: "Easy" },
+  { q: "Di Hunter x Hunter, manga ini dibuat oleh suami dari penulis Sailor Moon, yaitu?", options: ["Naoki Urasawa","Yoshihiro Togashi","Kentaro Miura","Hirohiko Araki"], ans: 1, cat: "Trivia", diff: "Easy" },
+  { q: "Di Demon Slayer, anime ini diproduksi oleh studio?", options: ["MAPPA","Bones","Ufotable","Madhouse"], ans: 2, cat: "Kimetsu", diff: "Easy" },
+  { q: "Di Fairy Tail, dragon yang membesarkan Natsu bernama?", options: ["Igneel","Metalicana","Grandeeney","Weisslogia"], ans: 0, cat: "Fairy Tail", diff: "Easy" },
+  { q: "Di Bleach, nama spiritual power yang digunakan Shinigami dan Hollow disebut?", options: ["Chakra","Mana","Reiatsu/Reiryoku","Nen"], ans: 2, cat: "Bleach", diff: "Easy" },
+];
+
+
+// ===== STATE =====
+let users = JSON.parse(localStorage.getItem('oq_users') || '[]');
+let currentUser = JSON.parse(localStorage.getItem('oq_current') || 'null');
+let selectedAvatar = '🦊';
+let pendingPlay = false;
+let selectedDifficulty = 'random'; // 'random' | 'easy' | 'medium' | 'hard'
+let currentLbTab = 'random'; // active leaderboard tab
+
+// Timer state — gunakan timestamp agar tidak terpengaruh device speed
+let timerState = {
+  endTime: 0,
+  rafId: null,
+  duration: 15,
+  active: false,
+};
+
+let gameState = {
+  questions: [],
+  current: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  startTime: 0,
+  totalTime: 0,
+  shuffledOpts: [],
+  answered: false,
+};
+
+// ===== INIT =====
+window.onload = () => {
+  createParticles();
+  updateTopbar();
+};
+
+function createParticles() {
+  const emojis = ['⚔️','🌸','⭐','🔥','💫','🎌','🌙','⚡'];
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(p);
+  }
+}
+
+function updateTopbar() {
+  const right = document.getElementById('topbarRight');
+  if (currentUser) {
+    right.innerHTML = `
+      <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+      <div class="profile-chip">
+        <span class="av">${currentUser.avatar || '👤'}</span>
+        <span class="uname">${currentUser.username}</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">Logout</button>
+    `;
+  } else {
+    right.innerHTML = `
+      <button class="cat-btn-topbar" onclick="openCatalogue()">📖 Katalog</button>
+      <button class="btn-topbar-login" onclick="openAuthModal()">Login / Daftar</button>
+    `;
+  }
+}
+
+// ===== E-CATALOGUE =====
+function openCatalogue() {
+  document.getElementById('catModal').classList.add('show');
+}
+function closeCatalogue() {
+  document.getElementById('catModal').classList.remove('show');
+}
+
+// ===== NAVIGATION =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  stopTimer();
+  showPage('page-home');
+}
+
+// ===== AUTH MODAL =====
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('show');
+}
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('show');
+  // reset form
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('reg-username').value = '';
+  document.getElementById('reg-password').value = '';
+}
+
+function switchTab(tab) {
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+}
+
+function selectAvatar(el) {
+  document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAvatar = el.dataset.avatar;
+}
+
+// Klik tombol MULAI MAIN
+function handlePlayBtn() {
+  if (currentUser) {
+    openDiffModal();
+  } else {
+    pendingPlay = true;
+    openAuthModal();
+  }
+}
+
+function openDiffModal() {
+  document.getElementById('diffModal').classList.add('show');
+}
+function closeDiffModal() {
+  document.getElementById('diffModal').classList.remove('show');
+}
+
+async function handleLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password) { showToast('Isi username & password dulu!', 'error'); return; }
+
+  showToast('Logging in...', 'info');
+
+  let user = users.find(u => u.username === username && u.password === password);
+  if (!user) {
+    const sbUser = await loginFromSupabase(username, password);
+    if (sbUser) {
+      user = { username: sbUser.username, password, avatar: sbUser.avatar, highScore: 0, gamesPlayed: 0 };
+      users.push(user);
+      localStorage.setItem('oq_users', JSON.stringify(users));
+    }
+  }
+
+  if (!user) { showToast('Username atau password salah!', 'error'); return; }
+
+  currentUser = user;
+  localStorage.setItem('oq_current', JSON.stringify(user));
+  updateTopbar();
+  closeAuthModal();
+  showToast(`Welcome back, ${user.username}! ${user.avatar}`, 'success');
+
+  if (pendingPlay) {
+    pendingPlay = false;
+    setTimeout(() => openDiffModal(), 600);
+  }
+}
+
+async function handleRegister() {
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!username || !password) { showToast('Isi semua field dulu!', 'error'); return; }
+  if (username.length < 3) { showToast('Username minimal 3 karakter!', 'error'); return; }
+  if (users.find(u => u.username === username)) { showToast('Username sudah dipakai!', 'error'); return; }
+
+  showToast('Mendaftar...', 'info');
+
+  const result = await registerToSupabase(username, password, selectedAvatar);
+  if (result && result.code === '23505') { showToast('Username sudah dipakai!', 'error'); return; }
+
+  const newUser = { username, password, avatar: selectedAvatar, highScore: 0, gamesPlayed: 0 };
+  users.push(newUser);
+  localStorage.setItem('oq_users', JSON.stringify(users));
+  currentUser = newUser;
+  localStorage.setItem('oq_current', JSON.stringify(newUser));
+  updateTopbar();
+  closeAuthModal();
+  showToast(`Selamat datang, ${username}! ${selectedAvatar}`, 'success');
+
+  if (pendingPlay) {
+    pendingPlay = false;
+    setTimeout(() => openDiffModal(), 600);
+  }
+}
+
+function guestPlay() {
+  currentUser = { username: 'Tamu', avatar: '👤', highScore: 0, gamesPlayed: 0, isGuest: true };
+  updateTopbar();
+  closeAuthModal();
+  pendingPlay = false;
+  showToast('Main sebagai tamu — skor tidak akan disimpan!', 'info');
+  setTimeout(() => openDiffModal(), 600);
+}
+
+function handleLogout() {
+  currentUser = null;
+  localStorage.removeItem('oq_current');
+  updateTopbar();
+  goHome();
+  showToast('Berhasil logout!', 'info');
+}
+
+// ===== LEADERBOARD MODAL =====
+function openLeaderboard() {
+  document.getElementById('lbModal').classList.add('show');
+  currentLbTab = 'random';
+  // Reset tabs UI
+  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.lb-tab.t-random').classList.add('active');
+  renderLeaderboard('random');
+}
+function closeLeaderboard() {
+  document.getElementById('lbModal').classList.remove('show');
+}
+
+function switchLbTab(diff, el) {
+  currentLbTab = diff;
+  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard(diff);
+}
+
+async function renderLeaderboard(difficulty) {
+  const podiumEl = document.getElementById('lbPodium');
+  const listEl = document.getElementById('lbList');
+  listEl.innerHTML = '<div class="lb-loading">Loading... ⏳</div>';
+  podiumEl.innerHTML = '';
+
+  let allScores = await getLeaderboard(difficulty);
+  if (!allScores || allScores.length === 0) {
+    // Fallback ke data lokal hanya untuk random
+    if (difficulty === 'random') {
+      const localBest = {};
+      for (const u of users) {
+        if (u.highScore > 0) localBest[u.username] = { username: u.username, avatar: u.avatar || '👤', score: u.highScore };
+      }
+      allScores = Object.values(localBest).sort((a, b) => b.score - a.score);
+    }
+  }
+
+  const diffLabels = { random: '🎲 Random', easy: '⚡ Easy', medium: '🔥 Medium', hard: '💀 Hard' };
+
+  const top3 = allScores.slice(0, 3);
+  const order = [top3[1], top3[0], top3[2]];
+  const classes = ['p2', 'p1', 'p3'];
+  const crowns = ['🥈', '👑', '🥉'];
+  podiumEl.innerHTML = order.map((u, i) => u ? `
+    <div class="podium-place ${classes[i]}">
+      <span class="crown">${crowns[i]}</span>
+      <span class="podium-avatar">${u.avatar || '👤'}</span>
+      <span class="podium-name">${u.username}</span>
+      <span class="podium-score">${u.score}</span>
+    </div>
+  ` : `<div class="podium-place ${classes[i]}"><span style="color:var(--muted);font-size:0.7rem;font-weight:700;">???</span></div>`).join('');
+
+  if (allScores.length === 0) {
+    listEl.innerHTML = `<div class="lb-loading">Belum ada skor di kelas <b>${diffLabels[difficulty]}</b>. Jadilah yang pertama! 🚀</div>`;
+    return;
+  }
+  listEl.innerHTML = allScores.map((u, i) => `
+    <div class="lb-item ${currentUser && u.username === currentUser.username ? 'is-me' : ''}">
+      <span class="lb-rank">${i + 1}</span>
+      <span class="lb-avatar">${u.avatar || '👤'}</span>
+      <div class="lb-info">
+        <div class="lb-name">${u.username}</div>
+        <div class="lb-meta">Best score • ${diffLabels[difficulty]}${u.gamesPlayed ? ` • ${u.gamesPlayed}x main` : ''}</div>
+      </div>
+      <span class="lb-score-val">${u.score}</span>
+    </div>
+  `).join('');
+}
+
+// ===== TIMER (timestamp-based, tidak bergantung device speed) =====
+function stopTimer() {
+  timerState.active = false;
+  if (timerState.rafId) {
+    cancelAnimationFrame(timerState.rafId);
+    timerState.rafId = null;
+  }
+}
+
+function startTimer(duration, onTick, onExpire) {
+  stopTimer();
+  timerState.duration = duration;
+  timerState.endTime = performance.now() + duration * 1000;
+  timerState.active = true;
+
+  const circumference = 163.4;
+  const arc = document.getElementById('timerArc');
+  const text = document.getElementById('timerText');
+
+  function tick(now) {
+    if (!timerState.active) return;
+    const remaining = Math.max(0, (timerState.endTime - now) / 1000);
+    const pct = remaining / duration;
+    const offset = circumference * (1 - pct);
+
+    const color = remaining > 7 ? 'var(--cyan)' : remaining > 3 ? 'var(--yellow)' : 'var(--pink)';
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = color;
+    text.textContent = Math.ceil(remaining);
+    text.style.color = color;
+
+    if (onTick) onTick(remaining);
+
+    if (remaining <= 0) {
+      timerState.active = false;
+      if (onExpire) onExpire();
+      return;
+    }
+    timerState.rafId = requestAnimationFrame(tick);
+  }
+
+  timerState.rafId = requestAnimationFrame(tick);
+}
+
+// ===== QUIZ =====
+function startQuiz(difficulty) {
+  closeDiffModal();
+  selectedDifficulty = difficulty || 'random';
+
+  let pool;
+  if (selectedDifficulty === 'random') {
+    pool = [...questions];
+  } else {
+    const diffMap = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+    pool = questions.filter(q => q.diff === diffMap[selectedDifficulty]);
+  }
+
+  const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 10);
+  gameState = {
+    questions: shuffled,
+    current: 0,
+    score: 0,
+    correct: 0,
+    wrong: 0,
+    startTime: Date.now(),
+    totalTime: 0,
+    shuffledOpts: [],
+    answered: false,
+  };
+
+  // Show difficulty badge in quiz UI
+  const diffColors = { random: 'var(--purple)', easy: '#00E555', medium: 'var(--yellow)', hard: 'var(--pink)' };
+  const diffEmojis = { random: '🎲', easy: '⚡', medium: '🔥', hard: '💀' };
+  const diffEl = document.getElementById('activeDiffBadge');
+  if (diffEl) {
+    diffEl.textContent = `${diffEmojis[selectedDifficulty]} ${selectedDifficulty.toUpperCase()}`;
+    diffEl.style.color = diffColors[selectedDifficulty];
+  }
+
+  showPage('page-quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = gameState.questions[gameState.current];
+  const total = gameState.questions.length;
+  const progress = (gameState.current / total) * 100;
+
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('currentScore').textContent = gameState.score;
+  document.getElementById('questionCategory').textContent = q.cat;
+  document.getElementById('questionDiff').textContent = q.diff;
+  document.getElementById('questionText').textContent = `Q${gameState.current + 1}/${total}: ${q.q}`;
+
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  const shuffledOpts = q.options.map((opt, i) => ({ text: opt, origIdx: i })).sort(() => Math.random() - 0.5);
+  gameState.shuffledOpts = shuffledOpts;
+  gameState.answered = false;
+
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="answer-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    grid.appendChild(btn);
+  });
+
+  // Start timer using timestamp-based approach
+  startTimer(15, null, () => {
+    if (!gameState.answered) timeUp();
+  });
+}
+
+function selectAnswer(selectedIdx, btn) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  stopTimer();
+
+  const q = gameState.questions[gameState.current];
+  const isCorrect = gameState.shuffledOpts[selectedIdx].origIdx === q.ans;
+
+  document.querySelectorAll('.answer-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (gameState.shuffledOpts[i].origIdx === q.ans) b.classList.add('correct');
+  });
+  if (!isCorrect) btn.classList.add('wrong');
+
+  if (isCorrect) {
+    const arc = document.getElementById('timerArc');
+    const currentOffset = parseFloat(arc.style.strokeDashoffset) || 0;
+    const remaining = ((163.4 - currentOffset) / 163.4) * 15;
+    const timeBonus = Math.ceil(Math.max(0, remaining) * 10);
+    const points = 100 + timeBonus;
+    gameState.score += points;
+    gameState.correct++;
+    document.getElementById('currentScore').textContent = gameState.score;
+    showToast(`+${points} poin! ✓`, 'success');
+  } else {
+    gameState.wrong++;
+    showToast('Salah! 💀', 'error');
+  }
+
+  setTimeout(nextQuestion, 1500);
+}
+
+function timeUp() {
+  if (gameState.answered) return;
+  gameState.answered = true;
+
+  const q = gameState.questions[gameState.current];
+  document.querySelectorAll('.answer-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (gameState.shuffledOpts[i].origIdx === q.ans) b.classList.add('correct');
+  });
+  gameState.wrong++;
+  showToast('Waktu habis! ⏱️', 'error');
+  setTimeout(nextQuestion, 1500);
+}
+
+function nextQuestion() {
+  gameState.current++;
+  if (gameState.current >= gameState.questions.length) {
+    endGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+async function endGame() {
+  stopTimer();
+  gameState.totalTime = Math.round((Date.now() - gameState.startTime) / 1000);
+
+  const pct = gameState.correct / gameState.questions.length;
+  let emoji, title;
+  if (pct >= 0.9) { emoji = '🏆'; title = 'OTAKU SEJATI!'; }
+  else if (pct >= 0.7) { emoji = '🎉'; title = 'Keren Banget!'; }
+  else if (pct >= 0.5) { emoji = '👍'; title = 'Lumayan Nih!'; }
+  else { emoji = '📚'; title = 'Belajar Lagi Yuk~'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultScore').textContent = gameState.score;
+  document.getElementById('correctCount').textContent = gameState.correct;
+  document.getElementById('wrongCount').textContent = gameState.wrong;
+  document.getElementById('timeUsed').textContent = gameState.totalTime + 's';
+
+  const diffLabels = { random: '🎲 Random', easy: '⚡ Easy', medium: '🔥 Medium', hard: '💀 Hard' };
+  const resultDiffEl = document.getElementById('resultDiffLabel');
+  if (resultDiffEl) resultDiffEl.textContent = diffLabels[selectedDifficulty] || '';
+
+  // Tampilkan result dulu — jangan tunggu Supabase
+  showPage('page-result');
+  if (pct >= 0.7) launchConfetti();
+
+  // Simpan skor di background (tidak blocking UI)
+  if (currentUser && !currentUser.isGuest) {
+    const userIdx = users.findIndex(u => u.username === currentUser.username);
+    if (userIdx !== -1) {
+      users[userIdx].gamesPlayed = (users[userIdx].gamesPlayed || 0) + 1;
+      if (gameState.score > (users[userIdx].highScore || 0)) {
+        users[userIdx].highScore = gameState.score;
+      }
+      localStorage.setItem('oq_users', JSON.stringify(users));
+      currentUser = users[userIdx];
+      localStorage.setItem('oq_current', JSON.stringify(currentUser));
+    }
+    // Fire and forget — tidak pakai await agar tidak blocking
+    saveScore(currentUser.username, currentUser.avatar || '🦊', gameState.score, gameState.correct, selectedDifficulty)
+      .catch(e => console.warn('Save score error (non-critical):', e));
+  }
+}
+
+// ===== UTILS =====
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function launchConfetti() {
+  const colors = ['#FF3D8B','#FFD726','#00E5FF','#9B5DE5','#FF6B35','#00FF88'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    if (Math.random() > 0.5) c.style.borderRadius = '50%';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// Close modal when clicking overlay
+document.getElementById('authModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAuthModal();
+});
+document.getElementById('lbModal').addEventListener('click', function(e) {
+  if (e.target === this) closeLeaderboard();
+});
+document.getElementById('catModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCatalogue();
+});
+document.getElementById('diffModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDiffModal();
+});
+</script>
+</body>
+</html>
+
