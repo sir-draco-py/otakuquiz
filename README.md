@@ -231,6 +231,7 @@ CREATE POLICY "Service can update best_scores" ON best_scores FOR UPDATE USING (
 ```
 otakuquiz/
 └── index.html        ← Seluruh aplikasi (HTML + CSS + JS dalam satu file)
+└── vercel.json       ← Untuk koneksi ke Vercel
 └── README.md         ← Dokumentasi ini
 ```
 
